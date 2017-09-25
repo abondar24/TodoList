@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.abondar.experimental.todolist.mappers.DatabaseMapper">
+
+    <!--table user -->
+    <sql id="userTable">
+        user usr
+    </sql>
+
+    <sql id="userFields">
+        usr.id as usr_id,
+        usr.username as usr_username,
+        usr.password as usr_password
+    </sql>
+
+    <resultMap id="userMap" type="User">
+        <id column="usr_id" property="id"/>
+        <result column="usr_username" property="username"/>
+        <result column="usr_password" property="password"/>
+    </resultMap>
+
+    <insert id="insertOrUpdateUser" useGeneratedKeys="true" keyColumn="id" keyProperty="user.id">
+        INSERT INTO
+        user (username, password)
+        VALUES (
+        #{user.username},
+        #{user.password}
+        )
+        ON DUPLICATE KEY UPDATE
+        username       = #{user.username},
+        password       = #{user.password}
+    </insert>
+
+    <select id="findUserById" resultMap="userMap">
+        SELECT
+        <include refid="userFields"/>
+        FROM
+        <include refid="userTable"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="findUserByName" resultMap="userMap">
+        SELECT
+        <include refid="userFields"/>
+        FROM
+        <include refid="userTable"/>
+        WHERE username = #{username}
+    </select>
+
+    <delete id="deleteAllUsers">
+        DELETE FROM user
+    </delete>
+
+    <!--table todoLIst -->
+    <sql id="listTable">
+        todo_list lst
+    </sql>
+
+    <sql id="listFields">
+        lst.id as lst_id,
+        lst.name as lst_name,
+        lst.user_id as lst_userId
+    </sql>
+
+    <resultMap id="listMap" type="TodoList">
+        <id column="lst_id" property="id"/>
+        <result column="lst_name" property="name"/>
+        <result column="lst_userId" property="userId"/>
+    </resultMap>
+
+    <insert id="insertOrUpdateList" useGeneratedKeys="true" keyColumn="id" keyProperty="todo_list.id">
+        INSERT INTO
+        todo_list (name, user_id)
+        VALUES (
+        #{todoList.name},
+        #{todoList.userId}
+        )
+        ON DUPLICATE KEY UPDATE
+        name       = #{todoList.name},
+        user_id   = #{todoList.userId}
+    </insert>
+
+    <select id="findListById" resultMap="listMap">
+        SELECT
+        <include refid="listFields"/>
+        FROM
+        <include refid="listTable"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="findListsByUsername" resultMap="listMap">
+        SELECT
+        <include refid="listFields"/>
+        FROM
+        <include refid="listTable"/>
+        JOIN user usr on usr.id = user_id
+        WHERE username = #{username}
+    </select>
+
+
+    <delete id="deleteAllLists">
+        DELETE FROM todo_list
+    </delete>
+
+    <delete id="deleteListById">
+        DELETE FROM todo_list
+        WHERE id = #{id}
+    </delete>
+
+
+    <!--item todoLIst -->
+    <sql id="itemTable">
+        item itm
+    </sql>
+
+    <sql id="itemFields">
+        itm.id as itm_id,
+        itm.name as itm_name,
+        itm.done as itm_done,
+        itm.list_id as itm_listId
+    </sql>
+
+    <resultMap id="itemMap" type="Item">
+        <id column="itm_id" property="id"/>
+        <result column="itm_name" property="name"/>
+        <result column="itm_done" property="done"/>
+        <result column="itm_listId" property="listId"/>
+    </resultMap>
+
+    <insert id="insertOrUpdateItem" useGeneratedKeys="true" keyColumn="id" keyProperty="item.id">
+        INSERT INTO
+        item (name,done,list_id)
+        VALUES (
+        #{item.name},
+        #{item.done},
+        #{item.listId}
+        )
+        ON DUPLICATE KEY UPDATE
+        name       = #{item.name},
+        done    = #{item.done},
+        list_id    = #{item.listId}
+    </insert>
+
+    <select id="findItemById" resultMap="itemMap">
+        SELECT
+        <include refid="itemFields"/>
+        FROM
+        <include refid="itemTable"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="findItemsForList" resultMap="itemMap">
+        SELECT
+        <include refid="itemFields"/>
+        FROM
+        <include refid="itemTable"/>
+        JOIN todo_list lst on lst.id = list_id
+        WHERE lst.id = #{listId}
+    </select>
+
+    <delete id="deleteAllItems">
+        DELETE FROM item
+    </delete>
+
+    <delete id="deleteItemById">
+        DELETE FROM item
+        WHERE id = #{id}
+    </delete>
+
+
+</mapper>
