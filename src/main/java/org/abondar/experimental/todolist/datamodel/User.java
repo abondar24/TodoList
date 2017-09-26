@@ -1,5 +1,8 @@
 package org.abondar.experimental.todolist.datamodel;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class User {
     private Long id;
     private String username;
