@@ -38,14 +38,11 @@ public class DatabaseTest {
 
 
         User user = new User("alex", "alex1");
-
         mapper.insertOrUpdateUser(user);
 
-        User foundUser = mapper.findUserByName("alex");
+        User foundUser = mapper.findUserById(user.getId());
         assertEquals(foundUser.getUsername(), user.getUsername());
-
-        User foundUserById = mapper.findUserById(foundUser.getId());
-        assertEquals(foundUser.getId(), foundUserById.getId());
+        assertEquals(foundUser.getId(), foundUser.getId());
 
     }
 
@@ -59,12 +56,9 @@ public class DatabaseTest {
         User user = new User("alex", "alex1");
         mapper.insertOrUpdateUser(user);
 
-        User upd = mapper.findUserByName("alex");
-
-        upd.setPassword("alex21");
+        user.setPassword("alex21");
         mapper.insertOrUpdateUser(user);
-
-        User foundUser = mapper.findUserById(upd.getId());
+        User foundUser = mapper.findUserById(user.getId());
 
         assertEquals(foundUser.getPassword(), user.getPassword());
 
@@ -79,17 +73,13 @@ public class DatabaseTest {
         mapper.deleteAllUsers();
 
         User user = new User("alex", "alex1");
-
         mapper.insertOrUpdateUser(user);
 
-        user = mapper.findUserByName("alex");
-
         TodoList list = new TodoList("Salo", user.getId());
-
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
-        TodoList foundById = mapper.findListById(foundLists.get(0).getId());
+        List<TodoList> foundLists = mapper.findListsByUserId(user.getId());
+        TodoList foundById = mapper.findListById(list.getId());
         assertEquals(1, foundLists.size());
         assertEquals(list.getName(), foundLists.get(0).getName());
         assertEquals(foundLists.get(0).getId(), foundById.getId());
@@ -105,24 +95,18 @@ public class DatabaseTest {
         mapper.deleteAllUsers();
 
         User user = new User("alex", "alex1");
-
         mapper.insertOrUpdateUser(user);
 
-        user = mapper.findUserByName("alex");
-
         TodoList list = new TodoList("Salo", user.getId());
-
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
-
-        TodoList upd = foundLists.get(0);
+        TodoList upd = mapper.findListById(list.getId());
         upd.setName("asasa");
         mapper.insertOrUpdateList(upd);
 
         TodoList actualUpd = mapper.findListById(upd.getId());
 
-       assertEquals(upd.getId(),actualUpd.getId());
+        assertEquals(upd.getId(), actualUpd.getId());
 
 
     }
@@ -139,19 +123,15 @@ public class DatabaseTest {
 
         mapper.insertOrUpdateUser(user);
 
-        user = mapper.findUserByName("alex");
-
         TodoList list = new TodoList("Salo", user.getId());
 
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
+        mapper.deleteListById(list.getId());
 
-        mapper.deleteListById(foundLists.get(0).getId());
+        List<TodoList> foundLists = mapper.findListsByUserId(user.getId());
 
-        foundLists = mapper.findListsByUsername(user.getUsername());
-
-        assertEquals(0,foundLists.size());
+        assertEquals(0, foundLists.size());
 
     }
 
@@ -166,20 +146,16 @@ public class DatabaseTest {
         User user = new User("alex", "alex1");
 
         mapper.insertOrUpdateUser(user);
-
-        user = mapper.findUserByName("alex");
-
         TodoList list = new TodoList("Salo", user.getId());
 
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
-        Item item = new Item("eat",false,foundLists.get(0).getId());
+        Item item = new Item("eat", false, list.getId());
         mapper.insertOrUpdateItem(item);
 
-        List<Item> foundItems = mapper.findItemsForList(foundLists.get(0).getId());
+        List<Item> foundItems = mapper.findItemsForList(list.getId());
 
-        Item foundById = mapper.findItemById(foundItems.get(0).getId());
+        Item foundById = mapper.findItemById(item.getId());
 
         assertEquals(1, foundItems.size());
         assertEquals(item.getName(), foundItems.get(0).getName());
@@ -200,20 +176,13 @@ public class DatabaseTest {
 
         mapper.insertOrUpdateUser(user);
 
-        user = mapper.findUserByName("alex");
-
         TodoList list = new TodoList("Salo", user.getId());
-
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
-        Item item = new Item("eat",false,foundLists.get(0).getId());
+        Item item = new Item("eat", false, list.getId());
         mapper.insertOrUpdateItem(item);
 
-        List<Item> foundItems = mapper.findItemsForList(foundLists.get(0).getId());
-
-        Item upd = foundItems.get(0);
-
+        Item upd = mapper.findItemById(item.getId());
         upd.setDone(true);
         mapper.insertOrUpdateItem(upd);
 
@@ -232,23 +201,51 @@ public class DatabaseTest {
         User user = new User("alex", "alex1");
 
         mapper.insertOrUpdateUser(user);
+        TodoList list = new TodoList("Salo", user.getId());
 
-        user = mapper.findUserByName("alex");
+        mapper.insertOrUpdateList(list);
+
+        Item item = new Item("eat", false, list.getId());
+        mapper.insertOrUpdateItem(item);
+
+        mapper.deleteItemById(item.getId());
+
+        List<Item> foundItems = mapper.findItemsForList(list.getId());
+
+        assertEquals(0, foundItems.size());
+
+    }
+
+
+    @Test
+    public void testDelteItemForList() {
+        logger.info("Delete item by id test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+
+        User user = new User("alex", "alex1");
+
+        mapper.insertOrUpdateUser(user);
+
+        user = mapper.findUserById(user.getId());
 
         TodoList list = new TodoList("Salo", user.getId());
 
         mapper.insertOrUpdateList(list);
-        List<TodoList> foundLists = mapper.findListsByUsername(user.getUsername());
 
-        Item item = new Item("eat",false,foundLists.get(0).getId());
+        Item item = new Item("eat", false, list.getId());
         mapper.insertOrUpdateItem(item);
 
-        List<Item> foundItems = mapper.findItemsForList(foundLists.get(0).getId());
+        mapper.deleteItemsForList(list.getId());
 
-        mapper.deleteItemById(foundItems.get(0).getId());
+        List<Item> foundItems = mapper.findItemsForList(list.getId());
 
-        foundItems = mapper.findItemsForList(foundLists.get(0).getId());
+        assertEquals(0, foundItems.size());
 
-        assertEquals(0,foundItems.size());
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
     }
 }

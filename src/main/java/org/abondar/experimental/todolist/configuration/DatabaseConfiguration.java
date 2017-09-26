@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.core.io.Resource;
@@ -24,21 +25,28 @@ import javax.sql.DataSource;
 @MapperScan("org.abondar.experimental.todolist.mappers")
 public class DatabaseConfiguration {
 
-//    @Value("${db.driverClassName}")
-//    public String driverClassName;
-//
-//    @Value("${db.url}")
-//    public String dbUrl;
-//
-//    @Value("${db.username}")
-//    public String username;
-//
-//    @Value("${db.password}")
-//    public String password;
 
+    @Value("${db.url}")
+    private String dbUrl;
 
+    @Value("${db.username}")
+    private String username;
+
+    @Value("${db.password}")
+    private String password;
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+        Resource rs = new ClassPathResource("classpath:db.properties");
+        configurer.setLocation(rs);
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+
+    //using this fucking bean properties are read as null values
 //    @Bean
 //    public DataSource dataSource() {
+//
 //        BasicDataSource dataSource = new BasicDataSource();
 //        dataSource.setDriverClassName(driverClassName);
 //        dataSource.setUrl(dbUrl);
@@ -48,17 +56,17 @@ public class DatabaseConfiguration {
 //        return dataSource;
 //    }
 
+
+    //sout properties here on startup is ok
     @Bean
     public DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
         dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/todo_list");
         dataSource.setUsername("root");
         dataSource.setPassword("alex21");
 
         return dataSource;
     }
-
 
 
     @Bean

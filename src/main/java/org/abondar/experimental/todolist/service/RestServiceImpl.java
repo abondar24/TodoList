@@ -39,8 +39,8 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response logIn(User user) {
         logger.info(user.toString());
-        Long userId = dbMapper.insertOrUpdateUser(user);
-        return Response.ok(userId).build();
+        dbMapper.insertOrUpdateUser(user);
+        return Response.ok(user.getId()).build();
     }
 
     @POST
@@ -49,8 +49,8 @@ public class RestServiceImpl implements RestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response createOrEditList(TodoList list) {
-        Long listId=dbMapper.insertOrUpdateList(list);
-        return Response.ok(listId).build();
+        dbMapper.insertOrUpdateList(list);
+        return Response.ok(list.getId()).build();
     }
 
     @GET
@@ -69,8 +69,8 @@ public class RestServiceImpl implements RestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response createOrEditItem(Item item) {
-        Long itemId = dbMapper.insertOrUpdateItem(item);
-        return Response.ok(itemId).build();
+        dbMapper.insertOrUpdateItem(item);
+        return Response.ok(item.getId()).build();
     }
 
     @GET
@@ -78,7 +78,7 @@ public class RestServiceImpl implements RestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public Response getItemsForList(@QueryParam("list_id")Long listId) {
+    public Response getItemsForList(@QueryParam("list_id") Long listId) {
         List<Item> itemsForList = dbMapper.findItemsForList(listId);
         return Response.ok(itemsForList).build();
     }
@@ -88,7 +88,7 @@ public class RestServiceImpl implements RestService {
     @Path("/delete_item")
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public Response deleteItem(@QueryParam("item_id")Long id) {
+    public Response deleteItem(@QueryParam("item_id") Long id) {
         dbMapper.deleteItemById(id);
         return Response.ok().build();
     }

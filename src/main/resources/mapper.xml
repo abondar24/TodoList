@@ -22,7 +22,7 @@
         <result column="usr_password" property="password"/>
     </resultMap>
 
-    <insert id="insertOrUpdateUser" useGeneratedKeys="true" keyColumn="id" keyProperty="user.id">
+    <insert id="insertOrUpdateUser" useGeneratedKeys="true" keyColumn="id" keyProperty="user.id" >
         INSERT INTO
         user (username, password)
         VALUES (
@@ -42,13 +42,6 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findUserByName" resultMap="userMap">
-        SELECT
-        <include refid="userFields"/>
-        FROM
-        <include refid="userTable"/>
-        WHERE username = #{username}
-    </select>
 
     <delete id="deleteAllUsers">
         DELETE FROM user
@@ -71,7 +64,7 @@
         <result column="lst_userId" property="userId"/>
     </resultMap>
 
-    <insert id="insertOrUpdateList" useGeneratedKeys="true" keyColumn="id" keyProperty="todo_list.id">
+    <insert id="insertOrUpdateList" useGeneratedKeys="true" keyColumn="id" keyProperty="todoList.id">
         INSERT INTO
         todo_list (name, user_id)
         VALUES (
@@ -91,13 +84,13 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findListsByUsername" resultMap="listMap">
+    <select id="findListsByUserId" resultMap="listMap">
         SELECT
         <include refid="listFields"/>
         FROM
         <include refid="listTable"/>
         JOIN user usr on usr.id = user_id
-        WHERE username = #{username}
+        WHERE usr.id = #{userId}
     </select>
 
 
@@ -170,5 +163,11 @@
         WHERE id = #{id}
     </delete>
 
+
+    <delete id="deleteItemsForList" >
+        DELETE item FROM item
+        JOIN todo_list lst on lst.id = list_id
+        WHERE lst.id = #{listId}
+    </delete>
 
 </mapper>

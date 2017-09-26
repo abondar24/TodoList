@@ -12,15 +12,15 @@ public interface DatabaseMapper {
     void insertOrUpdateList(@Param("todoList") TodoList todoList);
     void insertOrUpdateItem(@Param("item") Item item);
     User findUserById(@Param("id") Long  id);
-    User findUserByName(@Param("username") String name);
     TodoList findListById(@Param("id") Long  id);
     Item findItemById(@Param("id") Long  id);
     List<Item> findItemsForList(@Param("listId") Long listId);
-    List<TodoList> findListsByUsername(@Param("username") String username);
+    List<TodoList> findListsByUserId(@Param("userId") Long userId);
     void deleteAllUsers();
     void deleteAllLists();
     void deleteAllItems();
     void deleteListById(@Param("id")Long id);
     void deleteItemById(@Param("id")Long id);
+    void deleteItemsForList(@Param("listId")Long listId);
 
 }
