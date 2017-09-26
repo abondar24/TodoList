@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TodoList</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet"/>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.css" rel="stylesheet">
+    <script src="js/angular.js"></script>
+    <script>
+        angular.module("todoList", [])
+            .constant("baseURL", "http://localhost:8080/cxf/todo_list")
+            .config(["$httpProvider", function ($httpProvider) {
+                $httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
+            }])
+            .controller("defaultCtrl", function ($scope, $http) {
+                $scope.showListForm = false;
+                $scope.showNewList = false;
+                $scope.todos = [];
+
+                $scope.list = {name: "", userId: 0};
+                $scope.user = {id: 1, username: "vasya", password: "assadsa"};
+
+                $scope.createList = function (newList) {
+                    $scope.showListForm = false;
+                    newList.userId = $scope.user.id;
+                    $scope.list = newList;
+
+                    $scope.showNewList = true
+                    //add http post for new list
+                };
+
+
+                $scope.addItem = function () {
+                    $scope.todos.push({text: $scope.formTodoText, done: false});
+                    $scope.formTodoText = '';
+                };
+
+
+            });
+    </script>
+    <style>
+        .odd {
+            background-color: #000
+        }
+
+        .even {
+            background-color: lavenderblush
+        }
+    </style>
+
+</head>
+<body ng-app="todoList">
+<div id="todoPanel" class="panel panel-primary" ng-controller="defaultCtrl">
+    <div class="panel-heading">Todo's list. User: {{user.username}}</div>
+    <div class="panel-body">
+
+
+        <button class="btn btn-info" ng-click="showListForm=true">
+            Create a new list
+        </button>
+
+        <div class="modal-dialog" ng-show="showListForm">
+            <form>
+                <div class="form-group">
+                    <label for="enterListName">List name</label>
+                    <input type="text" class="form-control" id="enterListName" ng-model="newList.name"
+                           placeholder="Enter list name">
+                </div>
+
+                <button type="submit" class="btn btn-primary" ng-click="createList(newList)">
+                    Submit
+                </button>
+            </form>
+        </div>
+
+
+        <div class="panel-heading" ng-show="showNewList">
+            List: {{list.name}}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Done</th>
+                </tr>
+                <tr ng-repeat="todo in todos">
+                    <td>{{$index + 1}}</td>
+                    <td>{{todo.item}}</td>
+                    <td>
+                        <input type="checkbox" value={{todo.done}} ng-model="updateItem(done)">
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary" ng-click="addItem(newItem)">
+                Submit
+            </button>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
