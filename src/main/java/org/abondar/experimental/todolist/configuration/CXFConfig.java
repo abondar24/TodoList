@@ -57,6 +57,7 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         Map<Object, Object> langMappings = new HashMap<>();
         langMappings.put("en", "en-gb");
         factory.setLanguageMappings(langMappings);
+        factory.setAddress("/todo_list");
 
         return factory.create();
     }
