@@ -1,4 +1,4 @@
-package org.abondar.experimental.todolist.service;
+package org.abondar.experimental.todolist.services;
 
 
 import org.abondar.experimental.todolist.datamodel.Item;

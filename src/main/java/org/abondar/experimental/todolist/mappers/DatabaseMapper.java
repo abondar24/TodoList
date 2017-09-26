@@ -3,10 +3,12 @@ package org.abondar.experimental.todolist.mappers;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+@Mapper
 public interface DatabaseMapper {
     void insertOrUpdateUser(@Param("user") User user);
     void insertOrUpdateList(@Param("todoList") TodoList todoList);

@@ -2,27 +2,25 @@ package org.abondar.experimental.todolist.test;
 
 
 import org.abondar.experimental.todolist.app.Application;
-import org.abondar.experimental.todolist.configuration.DatabaseConfiguration;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
 import org.abondar.experimental.todolist.mappers.DatabaseMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@Import(DatabaseConfiguration.class)
-@SpringBootApplication(scanBasePackageClasses = Application.class)
+@SpringBootTest(classes = Application.class)
 public class DatabaseTest {
     static Logger logger = LoggerFactory.getLogger(DatabaseTest.class);
 
@@ -100,13 +98,12 @@ public class DatabaseTest {
         TodoList list = new TodoList("Salo", user.getId());
         mapper.insertOrUpdateList(list);
 
-        TodoList upd = mapper.findListById(list.getId());
-        upd.setName("asasa");
-        mapper.insertOrUpdateList(upd);
+        list.setName("asasa");
+        mapper.insertOrUpdateList(list);
 
-        TodoList actualUpd = mapper.findListById(upd.getId());
+        TodoList actualUpd = mapper.findListById(list.getId());
 
-        assertEquals(upd.getId(), actualUpd.getId());
+        assertEquals(list.getId(), actualUpd.getId());
 
 
     }
@@ -182,11 +179,10 @@ public class DatabaseTest {
         Item item = new Item("eat", false, list.getId());
         mapper.insertOrUpdateItem(item);
 
-        Item upd = mapper.findItemById(item.getId());
-        upd.setDone(true);
-        mapper.insertOrUpdateItem(upd);
+        item.setDone(true);
+        mapper.insertOrUpdateItem(item);
 
-        upd = mapper.findItemById(upd.getId());
+       Item upd = mapper.findItemById(item.getId());
         assertEquals(true, upd.getDone());
     }
 

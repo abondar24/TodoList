@@ -1,7 +1,6 @@
-package org.abondar.experimental.todolist.service;
+package org.abondar.experimental.todolist.services;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
@@ -17,19 +16,17 @@ import java.io.IOException;
 import java.util.List;
 
 public class RestServiceImpl implements RestService {
-    private static final Logger logger = LoggerFactory.getLogger(RestServiceImpl.class);
-    private ObjectMapper mapper = new ObjectMapper();
+    private final Logger logger = LoggerFactory.getLogger(RestServiceImpl.class);
 
     @Autowired
     private DatabaseMapper dbMapper;
 
     @GET
     @Path("/echo")
-    @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response get() throws IOException {
-        String resp = mapper.writeValueAsString("Server is up");
-        return Response.ok(resp).build();
+        //String resp = mapper.writeValueAsString("Server is up");
+        return Response.ok("Server is up").build();
     }
 
     @POST
@@ -38,8 +35,8 @@ public class RestServiceImpl implements RestService {
     @Path("/log_in")
     @Override
     public Response logIn(User user) {
-        logger.info(user.toString());
         dbMapper.insertOrUpdateUser(user);
+        logger.info("logged in: "+user.toString());
         return Response.ok(user.getId()).build();
     }
 
@@ -50,6 +47,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response createOrEditList(TodoList list) {
         dbMapper.insertOrUpdateList(list);
+        logger.info("list added: "+list.toString());
         return Response.ok(list.getId()).build();
     }
 
@@ -59,6 +57,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response getListsByUser(@QueryParam("user_id") Long userId) {
         List<TodoList> todos = dbMapper.findListsByUserId(userId);
+        logger.info(todos.toString());
         return Response.ok(todos).build();
     }
 
@@ -69,6 +68,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response createOrEditItem(Item item) {
         dbMapper.insertOrUpdateItem(item);
+        logger.info(item.toString());
         return Response.ok(item.getId()).build();
     }
 
@@ -78,6 +78,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response getItemsForList(@QueryParam("list_id") Long listId) {
         List<Item> itemsForList = dbMapper.findItemsForList(listId);
+        logger.info(itemsForList.toString());
         return Response.ok(itemsForList).build();
     }
 
@@ -88,6 +89,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response deleteItem(@QueryParam("item_id") Long id) {
         dbMapper.deleteItemById(id);
+        logger.info("item deleted");
         return Response.ok().build();
     }
 
@@ -97,6 +99,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response clearList(@QueryParam("list_id") Long listId) {
         dbMapper.deleteItemsForList(listId);
+        logger.info("list cleared");
         return Response.ok().build();
     }
 
@@ -106,6 +109,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response deleteList(@QueryParam("list_id") Long id) {
         dbMapper.deleteListById(id);
+        logger.info("list deleted");
         return null;
     }
 

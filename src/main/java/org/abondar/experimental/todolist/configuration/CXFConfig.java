@@ -2,8 +2,8 @@ package org.abondar.experimental.todolist.configuration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import org.abondar.experimental.todolist.service.RestService;
-import org.abondar.experimental.todolist.service.RestServiceImpl;
+import org.abondar.experimental.todolist.services.RestService;
+import org.abondar.experimental.todolist.services.RestServiceImpl;
 import org.apache.cxf.Bus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.bus.spring.SpringBus;
@@ -16,6 +16,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
         factory.setBus(springBus());
         factory.setServiceBean(webService());
-        factory.setProviders(Collections.<Object>singletonList(provider));
+        factory.setProviders(Arrays.asList(provider));
         Map<Object, Object> extMappings = new HashMap<>();
         extMappings.put("json", "application/json");
         extMappings.put("xml", "application/xml");
