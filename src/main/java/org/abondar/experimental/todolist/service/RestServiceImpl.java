@@ -55,7 +55,6 @@ public class RestServiceImpl implements RestService {
 
     @GET
     @Path("/list_by_user_id")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response getListsByUser(@QueryParam("user_id") Long userId) {
@@ -75,7 +74,6 @@ public class RestServiceImpl implements RestService {
 
     @GET
     @Path("/items_for_list")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response getItemsForList(@QueryParam("list_id") Long listId) {
