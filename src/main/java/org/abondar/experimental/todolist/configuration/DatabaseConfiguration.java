@@ -17,41 +17,48 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
-import java.util.Properties;
+
 
 @Configuration
 @PropertySource("classpath:db.properties")
 @MapperScan("org.abondar.experimental.todolist.mappers")
 public class DatabaseConfiguration {
 
-    @Value("${ip_address}")
-    public String ipAddress;
-
-    @Value("${port}")
-    public String port;
-
-    @Value("${db_name}")
-    public String dbName;
-
-    @Value("${username}")
-    public String username;
-
-    @Value("${password}")
-    public String password;
+//    @Value("${db.driverClassName}")
+//    public String driverClassName;
+//
+//    @Value("${db.url}")
+//    public String dbUrl;
+//
+//    @Value("${db.username}")
+//    public String username;
+//
+//    @Value("${db.password}")
+//    public String password;
 
 
-
+//    @Bean
+//    public DataSource dataSource() {
+//        BasicDataSource dataSource = new BasicDataSource();
+//        dataSource.setDriverClassName(driverClassName);
+//        dataSource.setUrl(dbUrl);
+//        dataSource.setUsername(username);
+//        dataSource.setPassword(password);
+//
+//        return dataSource;
+//    }
 
     @Bean
     public DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl("jdbc:mysql://" + "127.0.0.1"
-                + ":" + "3306" + "/" + "todo_list");
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/todo_list");
         dataSource.setUsername("root");
         dataSource.setPassword("alex21");
 
         return dataSource;
     }
+
 
 
     @Bean

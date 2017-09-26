@@ -1,5 +1,6 @@
 package org.abondar.experimental.todolist.app;
 
+import org.abondar.experimental.todolist.configuration.CXFConfig;
 import org.abondar.experimental.todolist.configuration.DatabaseConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({DatabaseConfiguration.class})
+@Import({DatabaseConfiguration.class, CXFConfig.class})
 public class Application extends SpringBootServletInitializer {
 
     private static Logger logger = LoggerFactory.getLogger(Application.class);
