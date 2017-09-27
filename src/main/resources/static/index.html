@@ -14,29 +14,43 @@
             }])
             .controller("defaultCtrl", function ($scope, $http) {
                 $scope.showListForm = false;
-                $scope.showNewList = false;
                 $scope.todos = [];
 
-                $scope.list = {name: "", userId: 0};
+                //should filled with func from rest
+                $scope.lists =[];
                 $scope.user = {id: 1, username: "vasya", password: "assadsa"};
+
 
                 $scope.createList = function (newList) {
                     $scope.showListForm = false;
-                    newList.userId = $scope.user.id;
-                    $scope.list = newList;
+                    $scope.lists.push({
+                        name: newList.name,
+                        userId:$scope.user.id
+                    });
 
-                    $scope.showNewList = true
+
                     //add http post for new list
                 };
 
-
-                $scope.addItem = function () {
-                    $scope.todos.push({text: $scope.formTodoText, done: false});
+                $scope.addItem = function (item) {
+                    $scope.todos.push({text: item.name, done: item.done});
                     $scope.formTodoText = '';
+                };
+
+                $scope.updateItem = function (item) {
+                    $scope.todos.forEach(function (td) {
+                        if (td===item){
+                            td.name=item.name;
+                            td.done=item.done;
+
+                            //$http.post
+                        }
+                    });
                 };
 
 
             });
+
     </script>
     <style>
         .odd {
@@ -49,54 +63,56 @@
     </style>
 
 </head>
+
 <body ng-app="todoList">
 <div id="todoPanel" class="panel panel-primary" ng-controller="defaultCtrl">
+
     <div class="panel-heading">Todo's list. User: {{user.username}}</div>
     <div class="panel-body">
-
-
         <button class="btn btn-info" ng-click="showListForm=true">
             Create a new list
         </button>
 
-        <div class="modal-dialog" ng-show="showListForm">
-            <form>
-                <div class="form-group">
-                    <label for="enterListName">List name</label>
-                    <input type="text" class="form-control" id="enterListName" ng-model="newList.name"
-                           placeholder="Enter list name">
-                </div>
+        <form ng-show="showListForm">
+            <div class="form-group">
+                <label for="enterListName">List name</label>
+                <input type="text" class="form-control" id="enterListName" ng-model="newList.name"
+                       placeholder="Enter list name">
+            </div>
 
-                <button type="submit" class="btn btn-primary" ng-click="createList(newList)">
-                    Submit
-                </button>
-            </form>
-        </div>
-
-
-        <div class="panel-heading" ng-show="showNewList">
-            List: {{list.name}}
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Item</th>
-                    <th>Done</th>
-                </tr>
-                <tr ng-repeat="todo in todos">
-                    <td>{{$index + 1}}</td>
-                    <td>{{todo.item}}</td>
-                    <td>
-                        <input type="checkbox" value={{todo.done}} ng-model="updateItem(done)">
-
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <button type="submit" class="btn btn-primary" ng-click="addItem(newItem)">
+            <button type="submit" class="btn btn-primary" ng-click="createList(newList)">
                 Submit
             </button>
-        </div>
+        </form>
+
+            <div ng-repeat="list in lists">
+                <div class="panel-heading" >
+                    List: {{list.name}}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item</th>
+                            <th>Done</th>
+                        </tr>
+                        <tr ng-repeat="todo in todos">
+                            <td>{{$index + 1}}</td>
+                            <td>{{todo.item}}</td>
+                            <td>
+                                <input type="checkbox" value={{todo.done}} ng-model="updateItem(done)">
+
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary" ng-click="addItem(newItem)">
+                        Submit
+                    </button>
+                </div>
+            </div>
+
+
+
 
     </div>
 </div>
