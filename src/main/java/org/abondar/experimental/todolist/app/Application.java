@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @SpringBootApplication
 @Import({CXFConfig.class})
@@ -21,7 +23,6 @@ public class Application extends SpringBootServletInitializer {
 
         SpringApplicationBuilder builder = new SpringApplicationBuilder(Application.class);
         builder.web(true).bannerMode(Banner.Mode.OFF).run(args);
-//        SpringApplication.run(Application.class,args);
         logger.info("Application has started");
     }
 }

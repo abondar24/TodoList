@@ -50,7 +50,7 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
         factory.setBus(springBus());
         factory.setServiceBean(webService());
-        factory.setProviders(Arrays.asList(provider));
+        factory.setProviders(Collections.singletonList(provider));
         Map<Object, Object> extMappings = new HashMap<>();
         extMappings.put("json", "application/json");
         extMappings.put("xml", "application/xml");

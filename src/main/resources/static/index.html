@@ -20,12 +20,15 @@
 
                 //should filled with func from rest
                 $scope.lists = [];
+
                 $scope.user = {id: 1, username: "vasya", password: "assadsa"};
 
+                //for demo
                 $scope.listCounter = 0;
+
                 $scope.createList = function (newList) {
                     $scope.lists.push({
-                        //got demo
+                        //for demo
                         id: $scope.listCounter += 1,
                         name: newList.name,
                         userId: $scope.user.id
@@ -37,36 +40,60 @@
 
                 $scope.addItem = function (item) {
                     $scope.items.push({name: item.name, done: false, listId: item.listId});
-
-                    console.log($scope.items)
                     //add http post for new list
                 };
 
                 $scope.updateItem = function (item) {
-                    $scope.items.forEach(function (td) {
-                        if (td === item) {
-                            td.name = item.name;
-                            td.done = item.done;
+                    //$http.post
+                    $scope.items.splice(item, 1);
+                    $scope.items.splice(item, 0, item);
 
-                            //$http.post
-                        }
-                    });
+                    for (i=0;i<$scope.items.length;i++){
+                        console.log($scope.items[i])
+                    }
+
+                };
+
+                $scope.deleteAllLists = function () {
+                    ///$http call
+                    $scope.lists = []
+                };
+
+                $scope.clearList = function (listId) {
+                    ///$http call
+
+                    removeByAttr($scope.items, 'listId', listId)
+
+                };
+
+                $scope.deleteList = function (listId) {
+                    ///$http call
+                    removeByAttr($scope.items,'listId',listId);
+                    removeByAttr($scope.lists, 'id', listId);
+                };
+
+                $scope.deleteItem = function (itemId) {
+                    ///$http call
+                    $scope.items.splice(itemId,1);
                 };
 
 
+                var removeByAttr = function (arr, attr, value) {
+                    var i = arr.length;
+                    while (i--) {
+                        if (arr[i]
+                            && arr[i].hasOwnProperty(attr)
+                            && (arguments.length > 2 && arr[i][attr] === value )) {
+
+                            arr.splice(i, 1);
+
+                        }
+                    }
+                    return arr;
+                }
             });
 
     </script>
-    <style>
-        .odd {
-            background-color: #000
-        }
-
-        .even {
-            background-color: lavenderblush
-        }
-    </style>
-
 </head>
 
 <body ng-app="todoList">
@@ -74,8 +101,12 @@
 
     <div class="panel-heading">Todo's list. User: {{user.username}}</div>
     <div class="panel-body">
-        <button class="btn btn-info" data-toggle="modal" data-target="#list-modal">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#list-modal">
             Create a new list
+        </button>
+
+        <button class="btn btn-danger" ng-click="deleteAllLists()">
+            Delete all lists
         </button>
 
         <div id="list-modal" class="modal fade" role="dialog">
@@ -109,55 +140,99 @@
         <div ng-repeat="list in lists">
             <div class="panel-heading">
                 <h3>List: {{list.name}}</h3>
-                <table class="table">
+                <table class="table table-responsive ">
                     <thead>
                     <tr>
                         <th>#</th>
                         <th>Item</th>
                         <th>Done</th>
                     </tr>
+                    </thead>
+                    <tbody>
                     <tr ng-repeat="item in items">
                         <td>{{$index + 1}}</td>
-                        <td>{{item.name}}</td>
+                        <td  data-toggle="modal" href="#item-modal-update">{{item.name}}</td>
                         <td>
-                            <input type="checkbox" value={{todo.done}} ng-click="updateItem(todo)">
+                            <input type="checkbox" value={{item.done}} ng-click="updateItem(item)">
                             &nbsp;
                         </td>
                     </tr>
                     </tbody>
+
+                    <div id="item-modal-update" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Update an item</h4>
+                                </div>
+                                <div class="modal-body" >
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="updateItemName">Update item name</label>
+                                            <input type="text" class="form-control" id="updateItemName"
+                                                   ng-model="item.name"
+                                                   placeholder="Change item name">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" data-dismiss="modal"
+                                            ng-click="updateItem(item)">Update item
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                            ng-click="deleteItem(item)">Delete item
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </table>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#item-modal">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#item-modal-create">
                     Add
                 </button>
+                <button type="button" class="btn btn-primary"
+                        ng-click="clearList(list.id)">Clear selected list
+                </button>
+                <button type="button" class="btn btn-danger"
+                        ng-click="deleteList(list.id)">Delete selected list
+                </button>
 
-                <div id="item-modal" class="modal fade" role="dialog">-->
+                <div id="item-modal-create" class="modal fade" role="dialog">
                     <div class="modal-dialog">
 
                         <!-- Modal content-->
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <h4 class="modal-title">Create a new list</h4>
+                                <h4 class="modal-title">Add a new list</h4>
                             </div>
                             <div class="modal-body" ng-init="newItem = { name: '', done:false, listId:list.id}">
                                 <form>
                                     <div class="form-group">
-                                        <label for="enterListName">Item name</label>
+                                        <label for="enterItemName">Item name</label>
                                         <input type="text" class="form-control" id="enterItemName"
                                                ng-model="newItem.name"
-                                               placeholder="Enter list name">
+                                               placeholder="Enter item name">
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal"
-                                        ng-click="addItem(newItem)">Create
+                                <button type="button" class="btn btn-success" data-dismiss="modal"
+                                        ng-click="addItem(newItem)">Add item
                                 </button>
                             </div>
                         </div>
 
                     </div>
                 </div>
+
+
+
             </div>
         </div>
     </div>
