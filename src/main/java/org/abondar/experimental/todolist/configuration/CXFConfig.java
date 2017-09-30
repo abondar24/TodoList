@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableWebMvc
 @ImportResource({"classpath:META-INF/cxf/cxf.xml"})
 public class CXFConfig extends WebMvcConfigurerAdapter {
 
