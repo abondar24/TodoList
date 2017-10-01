@@ -51,7 +51,9 @@ public class RestServiceImpl implements RestService {
 
     @GET
     @Path("/echo")
-    @ApiOperation(value = "Check service status",
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Check service status",
             notes = "Returns if service is up")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Server is up")})
     @Override
@@ -64,6 +66,7 @@ public class RestServiceImpl implements RestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/log_in")
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "User log in",
             notes = "Creates a new user or logs in an exising one",
             consumes = "application/json",
@@ -82,6 +85,7 @@ public class RestServiceImpl implements RestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "Create or edit a list",
             notes = "Creates a new list or edits an existing one",
             consumes = "application/json",
@@ -98,6 +102,7 @@ public class RestServiceImpl implements RestService {
     @Path("/list_by_user_id")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "Find all lists by userId",
             produces = "application/json",
             response = TodoList.class,
@@ -115,6 +120,7 @@ public class RestServiceImpl implements RestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "Create or edit an item in list",
             notes = "Creates a new item or edits an existing one",
             consumes = "application/json",
@@ -131,6 +137,7 @@ public class RestServiceImpl implements RestService {
     @Path("/items_for_list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "Find all items for list",
             produces = "application/json",
             response = Item.class)
@@ -145,7 +152,9 @@ public class RestServiceImpl implements RestService {
 
     @GET
     @Path("/delete_item")
-    @ApiOperation(value = "Delete selected tem")
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Delete selected tem")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
     @Override
     public Response deleteItem(@ApiParam(value = "Item ID", required = true)
@@ -157,7 +166,9 @@ public class RestServiceImpl implements RestService {
 
     @GET
     @Path("/clear_list")
-    @ApiOperation(value = "Clear selected list")
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Clear selected list")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
     @Override
     public Response clearList(@ApiParam(value = "List ID", required = true)
@@ -170,6 +181,7 @@ public class RestServiceImpl implements RestService {
     @GET
     @Path("/delete_list")
     @ApiOperation(
+            tags = {"TodoAPI"},
             value = "Delete selected list")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
     @Override
