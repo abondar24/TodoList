@@ -8,12 +8,12 @@ import org.apache.cxf.Bus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.bus.spring.SpringBus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.apache.cxf.jaxrs.swagger.Swagger2Feature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.Arrays;
@@ -24,7 +24,6 @@ import java.util.Map;
 @Configuration
 @ImportResource({"classpath:META-INF/cxf/cxf.xml"})
 public class CXFConfig extends WebMvcConfigurerAdapter {
-
 
     @Bean(name = Bus.DEFAULT_BUS_ID)
     public SpringBus springBus() {
@@ -50,6 +49,7 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         factory.setBus(springBus());
         factory.setServiceBean(webService());
         factory.setProviders(Collections.singletonList(provider));
+        factory.setFeatures(Collections.singletonList(createSwaggerFeature()));
         Map<Object, Object> extMappings = new HashMap<>();
         extMappings.put("json", "application/json");
         extMappings.put("xml", "application/xml");
@@ -69,5 +69,22 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         provider.configure(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY,true);
         provider.configure(DeserializationFeature.UNWRAP_ROOT_VALUE,false);
         return provider;
+    }
+
+
+    @Bean
+    public Swagger2Feature createSwaggerFeature() {
+        Swagger2Feature swagger2Feature = new Swagger2Feature();
+        swagger2Feature.setPrettyPrint(true);
+        swagger2Feature.setSupportSwaggerUi(true);
+        swagger2Feature.setResourcePackage("org.abondar.experimental.services");
+        swagger2Feature.setHost("localhost:8080");
+        swagger2Feature.setBasePath("/cxf/todo_list");
+        swagger2Feature.setScanAllResources(true);
+        swagger2Feature.setTitle("TodoList Application");
+        swagger2Feature.setContact("https://www.github/abondar24");
+        swagger2Feature.setDescription("Another TodoList application with Spring Boot and Swagger");
+        swagger2Feature.setVersion("v1.0");
+        return swagger2Feature;
     }
 }
