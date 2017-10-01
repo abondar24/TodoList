@@ -1,11 +1,21 @@
 package org.abondar.experimental.todolist.datamodel;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
+@ApiModel(value="User", description="User data")
 public class User {
+
+    @ApiModelProperty(value = "ID of user")
     private Long id;
+
+    @ApiModelProperty(value = "Username")
     private String username;
+
+    @ApiModelProperty(value = "User's password")
     private String password;
 
     public User(String username, String password) {

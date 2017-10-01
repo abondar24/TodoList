@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,15 +74,8 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
     public Swagger2Feature createSwaggerFeature() {
         Swagger2Feature swagger2Feature = new Swagger2Feature();
         swagger2Feature.setPrettyPrint(true);
-        swagger2Feature.setSupportSwaggerUi(true);
-        swagger2Feature.setResourcePackage("org.abondar.experimental.services");
         swagger2Feature.setHost("localhost:8080");
         swagger2Feature.setBasePath("/cxf/todo_list");
-        swagger2Feature.setScanAllResources(true);
-        swagger2Feature.setTitle("TodoList Application");
-        swagger2Feature.setContact("https://www.github/abondar24");
-        swagger2Feature.setDescription("Another TodoList application with Spring Boot and Swagger");
-        swagger2Feature.setVersion("v1.0");
         return swagger2Feature;
     }
 }
