@@ -16,11 +16,11 @@ public interface RestService {
 
     public Response loginUser(String username, String password) throws InvalidHashException,CannotPerformOperationException,IOException;
 
-    public Response createOrEditList(TodoList list);
+    public Response createOrEditList(TodoList list)throws IOException;
 
     public Response getListsByUser(Long userId);
 
-    public Response createOrEditItem(Item item);
+    public Response createOrEditItem(Item item)throws IOException;
 
     public Response getItemsForList(Long listId);
 

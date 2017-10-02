@@ -108,7 +108,8 @@ public class RestServiceImpl implements RestService {
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.createToken(user.getUsername(), "borscht", null)),
                 "JWT token", 6000, false);
-        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(objectMapper.writeValueAsString(user.getId())).build();
+        return Response.status(Response.Status.ACCEPTED).cookie(cookie)
+                .entity(objectMapper.writeValueAsString(user.getId())).build();
 
     }
 
@@ -139,7 +140,8 @@ public class RestServiceImpl implements RestService {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
         NewCookie cookie = new NewCookie("X-JWT-AUTH", authService.authorizeUser(user));
-        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(user.getId()).build();
+        return Response.status(Response.Status.ACCEPTED).cookie(cookie)
+                .entity(objectMapper.writeValueAsString(user.getId())).build();
     }
 
 
@@ -155,10 +157,10 @@ public class RestServiceImpl implements RestService {
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "List id")})
     @Override
-    public Response createOrEditList(@ApiParam(value = "List data", required = true) TodoList list) {
+    public Response createOrEditList(@ApiParam(value = "List data", required = true) TodoList list) throws IOException {
         dbMapper.insertOrUpdateList(list);
         logger.info("list added: " + list.toString());
-        return Response.ok(list.getId()).build();
+        return Response.ok(objectMapper.writeValueAsString(list.getId())).build();
     }
 
     @GET
@@ -199,10 +201,10 @@ public class RestServiceImpl implements RestService {
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Item id")})
     @Override
-    public Response createOrEditItem(@ApiParam(value = "Item data", required = true) Item item) {
+    public Response createOrEditItem(@ApiParam(value = "Item data", required = true) Item item) throws IOException {
         dbMapper.insertOrUpdateItem(item);
         logger.info(item.toString());
-        return Response.ok(item.getId()).build();
+        return  Response.ok(objectMapper.writeValueAsString(item.getId())).build();
     }
 
     @GET
