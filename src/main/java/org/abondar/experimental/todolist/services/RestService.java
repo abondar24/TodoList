@@ -14,6 +14,7 @@ public interface RestService {
 
     public Response logIn(User user);
 
+    public Response getUserName(String username);
 
     public Response createOrEditList(TodoList list);
 

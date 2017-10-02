@@ -1,6 +1,7 @@
 package org.abondar.experimental.todolist.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
@@ -49,8 +50,11 @@ public class RestServiceImpl implements RestService {
     @Autowired
     private DatabaseMapper dbMapper;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @GET
     @Path("/echo")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Check service status",
@@ -58,7 +62,7 @@ public class RestServiceImpl implements RestService {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Server is up")})
     @Override
     public Response get() throws IOException {
-        return Response.ok("Server is up").build();
+        return Response.ok().build();
     }
 
     @POST
@@ -78,6 +82,31 @@ public class RestServiceImpl implements RestService {
         dbMapper.insertOrUpdateUser(user);
         logger.info("logged in: " + user.toString());
         return Response.ok(user.getId()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/get_username")
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Get user by name",
+            notes = "Checks if username exists.")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Username not found"),
+            @ApiResponse(code = 302, message = "Username exists")})
+    @Override
+    public Response getUserName(
+            @ApiParam(value = "Username", required = true)
+            @QueryParam("username") String username) {
+        System.out.println("Param:" + username);
+        User user = dbMapper.findUserByName(username);
+
+        System.out.println("Res:" + user);
+        if (user != null) {
+            return Response.status(302).build();
+        } else {
+            return Response.ok().build();
+        }
+
     }
 
     @POST
@@ -107,12 +136,22 @@ public class RestServiceImpl implements RestService {
             produces = "application/json",
             response = TodoList.class,
             responseContainer = "List")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "List of todo lists"),
+            @ApiResponse(code = 404, message = "User not found")
+    })
     @Override
     public Response getListsByUser(@ApiParam(value = "User ID", required = true)
                                    @QueryParam("user_id") Long userId) {
-        List<TodoList> todos = dbMapper.findListsByUserId(userId);
-        logger.info(todos.toString());
-        return Response.ok(todos).build();
+        User user = dbMapper.findUserById(userId);
+
+        if (user != null) {
+            List<TodoList> todos = dbMapper.findListsByUserId(userId);
+            logger.info(todos.toString());
+            return Response.ok(todos).build();
+        } else {
+            logger.info("User not found");
+            return Response.status(404).build();
+        }
     }
 
     @POST
@@ -141,12 +180,22 @@ public class RestServiceImpl implements RestService {
             value = "Find all items for list",
             produces = "application/json",
             response = Item.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "List of items"),
+            @ApiResponse(code = 404, message = "TodoList not found")
+    })
     @Override
     public Response getItemsForList(@ApiParam(value = "List ID", required = true)
                                     @QueryParam("list_id") Long listId) {
-        List<Item> itemsForList = dbMapper.findItemsForList(listId);
-        logger.info(itemsForList.toString());
-        return Response.ok(itemsForList).build();
+        TodoList list = dbMapper.findListById(listId);
+        if (list!=null){
+            List<Item> itemsForList = dbMapper.findItemsForList(listId);
+            logger.info(itemsForList.toString());
+            return Response.ok(itemsForList).build();
+        } else {
+            logger.info("List not found");
+            return Response.status(404).build();
+        }
+
     }
 
 

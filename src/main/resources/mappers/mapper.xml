@@ -42,6 +42,14 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findUserByName" resultMap="userMap">
+        SELECT
+        <include refid="userFields"/>
+        FROM
+        <include refid="userTable"/>
+        WHERE username = #{username}
+    </select>
+
 
     <delete id="deleteAllUsers">
         DELETE FROM user

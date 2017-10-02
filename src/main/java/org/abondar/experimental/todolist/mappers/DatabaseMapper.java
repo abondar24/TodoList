@@ -14,6 +14,7 @@ public interface DatabaseMapper {
     void insertOrUpdateList(@Param("todoList") TodoList todoList);
     void insertOrUpdateItem(@Param("item") Item item);
     User findUserById(@Param("id") Long  id);
+    User findUserByName(@Param("username") String username);
     TodoList findListById(@Param("id") Long  id);
     Item findItemById(@Param("id") Long  id);
     List<Item> findItemsForList(@Param("listId") Long listId);

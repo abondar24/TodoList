@@ -6,9 +6,9 @@ import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
 import org.abondar.experimental.todolist.mappers.DatabaseMapper;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,22 @@ public class DatabaseTest {
         User foundUser = mapper.findUserById(user.getId());
         assertEquals(foundUser.getUsername(), user.getUsername());
         assertEquals(foundUser.getId(), foundUser.getId());
+
+    }
+
+    @Test
+    public void testFindUserByName(){
+        logger.info("Find user by name Test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+
+
+        User user = new User("alex", "alex1");
+        mapper.insertOrUpdateUser(user);
+
+        User foundUser = mapper.findUserByName(user.getUsername());
+        assertEquals(foundUser.getUsername(), user.getUsername());
 
     }
 
@@ -239,7 +255,11 @@ public class DatabaseTest {
 
         assertEquals(0, foundItems.size());
 
+    }
 
+
+    @After
+    public void cleanDatabase(){
         mapper.deleteAllItems();
         mapper.deleteAllLists();
         mapper.deleteAllUsers();
