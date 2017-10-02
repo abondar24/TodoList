@@ -1,6 +1,7 @@
 package org.abondar.experimental.todolist.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
@@ -12,7 +13,6 @@ import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 
 
 import javax.annotation.security.PermitAll;
@@ -61,6 +61,8 @@ public class RestServiceImpl implements RestService {
     @Autowired
     private DatabaseMapper dbMapper;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @GET
     @Path("/echo")
     @Produces(MediaType.APPLICATION_JSON)
@@ -88,12 +90,11 @@ public class RestServiceImpl implements RestService {
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "User id"),
             @ApiResponse(code = 302, message = "Username exists")})
-    @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true)
     @Override
     public Response createUser(@ApiParam(value = "Username", required = true)
                                @FormParam("username") String username,
                                @ApiParam(value = "Password", required = true)
-                               @FormParam("password") String password) throws CannotPerformOperationException {
+                               @FormParam("password") String password) throws CannotPerformOperationException,IOException {
         User user = dbMapper.findUserByName(username);
         if (user != null) {
             return Response.status(302).build();
@@ -107,7 +108,7 @@ public class RestServiceImpl implements RestService {
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.createToken(user.getUsername(), "borscht", null)),
                 "JWT token", 6000, false);
-        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(user.getId()).build();
+        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(objectMapper.writeValueAsString(user.getId())).build();
 
     }
 

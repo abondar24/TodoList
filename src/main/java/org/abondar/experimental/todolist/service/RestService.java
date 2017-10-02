@@ -12,7 +12,7 @@ public interface RestService {
 
     public Response echo();
 
-    public Response createUser(String username, String password) throws CannotPerformOperationException;
+    public Response createUser(String username, String password) throws CannotPerformOperationException,IOException;
 
     public Response loginUser(String username, String password) throws InvalidHashException,CannotPerformOperationException,IOException;
 

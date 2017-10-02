@@ -1,6 +1,7 @@
 package org.abondar.experimental.todolist.test;
 
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.abondar.experimental.todolist.app.Application;
 import org.abondar.experimental.todolist.datamodel.User;
 import org.abondar.experimental.todolist.mapper.DatabaseMapper;
@@ -21,8 +22,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.Collections;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -66,7 +72,7 @@ public class ApiTest {
         mapper.deleteAllItems();
         mapper.deleteAllLists();
         mapper.deleteAllUsers();
-        WebClient client = WebClient.create(endpoint);
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         WebClient.getConfig(client).getRequestContext().put(LocalConduit.DIRECT_DISPATCH, Boolean.TRUE);
 
         String username = "alex";
@@ -75,11 +81,11 @@ public class ApiTest {
         form.param("username",username);
         form.param("password",password);
 
-        client.path("/createUser");
-        client.form(form);
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
 
-        User user = (User) client.get().getEntity();
-        assertEquals(username, user.getUsername());
+        Long userId = client.post(form).readEntity(Long.class);
+        User user = mapper.findUserById(userId);
+        assertEquals(username,user.getUsername());
     }
 
     @After
