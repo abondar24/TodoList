@@ -5,7 +5,7 @@ import org.abondar.experimental.todolist.app.Application;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
-import org.abondar.experimental.todolist.mappers.DatabaseMapper;
+import org.abondar.experimental.todolist.mapper.DatabaseMapper;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;

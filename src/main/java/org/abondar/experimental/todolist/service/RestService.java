@@ -1,18 +1,20 @@
-package org.abondar.experimental.todolist.services;
+package org.abondar.experimental.todolist.service;
 
 
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
-import org.abondar.experimental.todolist.datamodel.User;
+import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 public interface RestService {
 
-    public Response get();
+    public Response echo();
 
-    public Response createUser(String login, String password);
+    public Response createUser(String username, String password) throws CannotPerformOperationException;
+
+    public Response loginUser(String username, String password) throws InvalidHashException,CannotPerformOperationException,IOException;
 
     public Response createOrEditList(TodoList list);
 

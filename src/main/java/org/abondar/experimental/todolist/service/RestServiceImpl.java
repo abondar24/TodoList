@@ -1,19 +1,25 @@
-package org.abondar.experimental.todolist.services;
+package org.abondar.experimental.todolist.service;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
 import org.abondar.experimental.todolist.datamodel.User;
-import org.abondar.experimental.todolist.mappers.DatabaseMapper;
+import org.abondar.experimental.todolist.mapper.DatabaseMapper;
+
+import static org.abondar.experimental.todolist.security.PasswordUtil.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 
+
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
@@ -46,56 +52,98 @@ import java.util.List;
 public class RestServiceImpl implements RestService {
     private final Logger logger = LoggerFactory.getLogger(RestServiceImpl.class);
 
+    private AuthService authService;
+
+    public RestServiceImpl(AuthService authService) {
+        this.authService = authService;
+    }
+
     @Autowired
     private DatabaseMapper dbMapper;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @GET
     @Path("/echo")
     @Produces(MediaType.APPLICATION_JSON)
+    @PermitAll
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Check service status",
             notes = "Returns if service is up")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Server is up")})
     @Override
-    public Response get() {
+    public Response echo() {
         return Response.ok().build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/log_in")
+    @Path("/create_user")
+    @PermitAll
     @ApiOperation(
             tags = {"TodoAPI"},
-            value = "User log in",
-            notes = "Creates a new user or logs in an exising one",
+            value = "Create user",
+            notes = "Creates a new user",
             consumes = "application/x-www-urlformEncoded",
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "User id"),
-                          @ApiResponse(code = 302, message = "Username exists")})
+            @ApiResponse(code = 302, message = "Username exists")})
     @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true)
     @Override
     public Response createUser(@ApiParam(value = "Username", required = true)
                                @FormParam("username") String username,
                                @ApiParam(value = "Password", required = true)
-                               @FormParam("password") String password) {
+                               @FormParam("password") String password) throws CannotPerformOperationException {
         User user = dbMapper.findUserByName(username);
         if (user != null) {
             return Response.status(302).build();
-        } else {
-            user = new User(username, password);
-            dbMapper.insertOrUpdateUser(user);
-            logger.info("user created: " + user.toString());
-            return Response.ok(user.getId()).build();
         }
+
+        String pwdHash = createHash(password);
+        user = new User(username, pwdHash);
+        dbMapper.insertOrUpdateUser(user);
+        logger.info("user created: " + user.toString());
+
+        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
+                authService.createToken(user.getUsername(), "borscht", null)),
+                "JWT token", 6000, false);
+        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(user.getId()).build();
+
     }
 
 
     @POST
-    @Path("/list")
+    @Path("/login_user")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @PermitAll
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Log user",
+            notes = "Logs in a user",
+            consumes = "application/x-www-urlformEncoded",
+            produces = "application/json")
+    @Override
+    public Response loginUser(
+            @ApiParam(value = "Username", required = true)
+            @FormParam("username") String username,
+            @ApiParam(value = "Password", required = true)
+            @FormParam("password") String password) throws InvalidHashException, CannotPerformOperationException, IOException {
+        User user = dbMapper.findUserByName(username);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (!verifyPassword(password, user.getPassword())) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        NewCookie cookie = new NewCookie("X-JWT-AUTH", authService.authorizeUser(user));
+        return Response.status(Response.Status.ACCEPTED).cookie(cookie).entity(user.getId()).build();
+    }
+
+
+    @POST
+    @Path("/create_list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -113,7 +161,7 @@ public class RestServiceImpl implements RestService {
     }
 
     @GET
-    @Path("/list_by_user_id")
+    @Path("/get_lists_by_user_id")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             tags = {"TodoAPI"},
@@ -128,19 +176,18 @@ public class RestServiceImpl implements RestService {
     public Response getListsByUser(@ApiParam(value = "User ID", required = true)
                                    @QueryParam("user_id") Long userId) {
         User user = dbMapper.findUserById(userId);
-
-        if (user != null) {
-            List<TodoList> todos = dbMapper.findListsByUserId(userId);
-            logger.info(todos.toString());
-            return Response.ok(todos).build();
-        } else {
+        if (user == null) {
             logger.info("User not found");
-            return Response.status(404).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+
+        List<TodoList> todos = dbMapper.findListsByUserId(userId);
+        logger.info(todos.toString());
+        return Response.ok(todos).build();
     }
 
     @POST
-    @Path("/item")
+    @Path("/create_item")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -158,7 +205,7 @@ public class RestServiceImpl implements RestService {
     }
 
     @GET
-    @Path("/items_for_list")
+    @Path("/get_items_for_list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             tags = {"TodoAPI"},
@@ -172,14 +219,14 @@ public class RestServiceImpl implements RestService {
     public Response getItemsForList(@ApiParam(value = "List ID", required = true)
                                     @QueryParam("list_id") Long listId) {
         TodoList list = dbMapper.findListById(listId);
-        if (list != null) {
-            List<Item> itemsForList = dbMapper.findItemsForList(listId);
-            logger.info(itemsForList.toString());
-            return Response.ok(itemsForList).build();
-        } else {
+        if (list == null) {
             logger.info("List not found");
-            return Response.status(404).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+        List<Item> itemsForList = dbMapper.findItemsForList(listId);
+        logger.info(itemsForList.toString());
+        return Response.ok(itemsForList).build();
+
 
     }
 

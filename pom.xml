@@ -8,16 +8,9 @@
     <artifactId>TodoList</artifactId>
     <version>1.0</version>
     <properties>
-        <spring.version>4.3.11.RELEASE</spring.version>
         <springboot.version>1.5.7.RELEASE</springboot.version>
         <cxf.version>3.2.0</cxf.version>
     </properties>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.7.RELEASE</version>
-    </parent>
 
     <dependencyManagement>
         <dependencies>

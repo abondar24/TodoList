@@ -1,4 +1,4 @@
-package org.abondar.experimental.todolist.mappers;
+package org.abondar.experimental.todolist.mapper;
 
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
