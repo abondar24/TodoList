@@ -10,11 +10,9 @@ import java.io.IOException;
 
 public interface RestService {
 
-    public Response get() throws IOException;
+    public Response get();
 
-    public Response logIn(User user);
-
-    public Response getUserName(String username);
+    public Response createUser(String login, String password);
 
     public Response createOrEditList(TodoList list);
 
@@ -23,6 +21,8 @@ public interface RestService {
     public Response createOrEditItem(Item item);
 
     public Response getItemsForList(Long listId);
+
+    public Response deleteUser(Long id);
 
     public Response deleteItem(Long id);
 

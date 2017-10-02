@@ -78,6 +78,22 @@ public class DatabaseTest {
 
     }
 
+    @Test
+    public void testDeleteUserById(){
+        logger.info("Delete User Test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        User user = new User("alex", "alex1");
+        mapper.insertOrUpdateUser(user);
+
+        mapper.deleteUserById(user.getId());
+
+        user = mapper.findUserById(user.getId());
+        assertEquals(null,user);
+
+    }
+
 
     @Test
     public void testInsertList() {

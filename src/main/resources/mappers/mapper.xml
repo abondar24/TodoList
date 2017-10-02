@@ -55,6 +55,11 @@
         DELETE FROM user
     </delete>
 
+    <delete id="deleteUserById">
+        DELETE FROM user
+        WHERE id = #{id}
+    </delete>
+
     <!--table todoLIst -->
     <sql id="listTable">
         todo_list lst

@@ -10,7 +10,7 @@ import org.abondar.experimental.todolist.mappers.DatabaseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -18,7 +18,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 
-@Service
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
 @Path("/")
 @SwaggerDefinition(
@@ -61,53 +60,39 @@ public class RestServiceImpl implements RestService {
             notes = "Returns if service is up")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Server is up")})
     @Override
-    public Response get() throws IOException {
+    public Response get() {
         return Response.ok().build();
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/log_in")
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "User log in",
             notes = "Creates a new user or logs in an exising one",
-            consumes = "application/json",
+            consumes = "application/x-www-urlformEncoded",
             produces = "application/json")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "User id")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "User id"),
+                          @ApiResponse(code = 302, message = "Username exists")})
+    @CrossOriginResourceSharing(allowAllOrigins = true, allowCredentials = true)
     @Override
-    public Response logIn(@ApiParam(value = "User data",
-            required = true) User user) {
-        dbMapper.insertOrUpdateUser(user);
-        logger.info("logged in: " + user.toString());
-        return Response.ok(user.getId()).build();
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/get_username")
-    @ApiOperation(
-            tags = {"TodoAPI"},
-            value = "Get user by name",
-            notes = "Checks if username exists.")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Username not found"),
-            @ApiResponse(code = 302, message = "Username exists")})
-    @Override
-    public Response getUserName(
-            @ApiParam(value = "Username", required = true)
-            @QueryParam("username") String username) {
-        System.out.println("Param:" + username);
+    public Response createUser(@ApiParam(value = "Username", required = true)
+                               @FormParam("username") String username,
+                               @ApiParam(value = "Password", required = true)
+                               @FormParam("password") String password) {
         User user = dbMapper.findUserByName(username);
-
-        System.out.println("Res:" + user);
         if (user != null) {
             return Response.status(302).build();
         } else {
-            return Response.ok().build();
+            user = new User(username, password);
+            dbMapper.insertOrUpdateUser(user);
+            logger.info("user created: " + user.toString());
+            return Response.ok(user.getId()).build();
         }
-
     }
+
 
     @POST
     @Path("/list")
@@ -187,7 +172,7 @@ public class RestServiceImpl implements RestService {
     public Response getItemsForList(@ApiParam(value = "List ID", required = true)
                                     @QueryParam("list_id") Long listId) {
         TodoList list = dbMapper.findListById(listId);
-        if (list!=null){
+        if (list != null) {
             List<Item> itemsForList = dbMapper.findItemsForList(listId);
             logger.info(itemsForList.toString());
             return Response.ok(itemsForList).build();
@@ -198,12 +183,25 @@ public class RestServiceImpl implements RestService {
 
     }
 
+    @GET
+    @Path("/delete_user")
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Delete selected user")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
+    @Override
+    public Response deleteUser(@ApiParam(value = "User ID", required = true)
+                               @QueryParam("user_id") Long id) {
+        dbMapper.deleteUserById(id);
+        logger.info("item deleted");
+        return Response.ok().build();
+    }
 
     @GET
     @Path("/delete_item")
     @ApiOperation(
             tags = {"TodoAPI"},
-            value = "Delete selected tem")
+            value = "Delete selected item")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
     @Override
     public Response deleteItem(@ApiParam(value = "Item ID", required = true)
