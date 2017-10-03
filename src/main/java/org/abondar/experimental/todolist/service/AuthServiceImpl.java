@@ -16,6 +16,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static org.abondar.experimental.todolist.security.PasswordUtil.*;
+
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
@@ -70,12 +72,12 @@ public class AuthServiceImpl implements AuthService {
         if (password == null) {
             throw new InvalidPasswordException("Supplied password is null!");
         }
-        if (password.startsWith("sha1:64000")) {
+        if (user.getPassword().startsWith("sha1:64000")) {
             try {
-                if (!PasswordUtil.verifyPassword(password, user.getPassword())) {
+                if (!verifyPassword(password, user.getPassword())) {
                     throw new InvalidPasswordException("Password verification failed!");
                 }
-            } catch (PasswordUtil.CannotPerformOperationException | PasswordUtil.InvalidHashException ex) {
+            } catch (CannotPerformOperationException | InvalidHashException ex) {
                 throw new InvalidPasswordException("Password verification failed!", ex);
             }
         } else if (!user.getPassword().equals(password)) {
@@ -86,8 +88,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String authorizeUser(User user) throws InvalidPasswordException {
-        if (validateUser(user.getId(), user.getPassword())) {
+    public String authorizeUser(User user,String pwd) throws InvalidPasswordException {
+        if (validateUser(user.getId(), pwd)) {
             return createToken(user.getUsername(), "borscht", null);
         }
         return null;

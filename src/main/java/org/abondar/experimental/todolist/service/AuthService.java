@@ -16,7 +16,7 @@ public interface AuthService {
 
     public boolean validateUser(Long userId,String password) throws InvalidPasswordException;
 
-    public String authorizeUser(User user) throws InvalidPasswordException;
+    public String authorizeUser(User user,String pwd) throws InvalidPasswordException;
 
 
     public void logRecord(Date logDate, String action, String subject, String record);

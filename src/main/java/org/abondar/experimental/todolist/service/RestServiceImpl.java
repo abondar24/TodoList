@@ -97,13 +97,14 @@ public class RestServiceImpl implements RestService {
                                @FormParam("password") String password) throws CannotPerformOperationException,IOException {
         User user = dbMapper.findUserByName(username);
         if (user != null) {
+            logger.info("User already exists");
             return Response.status(302).build();
         }
 
         String pwdHash = createHash(password);
         user = new User(username, pwdHash);
         dbMapper.insertOrUpdateUser(user);
-        logger.info("user created: " + user.toString());
+        logger.info("User created: " + user.toString());
 
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.createToken(user.getUsername(), "borscht", null)),
@@ -121,25 +122,30 @@ public class RestServiceImpl implements RestService {
     @PermitAll
     @ApiOperation(
             tags = {"TodoAPI"},
-            value = "Log user",
-            notes = "Logs in a user",
+            value = "Log in a user",
             consumes = "application/x-www-urlformEncoded",
             produces = "application/json")
     @Override
     public Response loginUser(
-            @ApiParam(value = "Username", required = true)
+            @ApiParam(value = "username", required = true)
             @FormParam("username") String username,
-            @ApiParam(value = "Password", required = true)
+            @ApiParam(value = "password", required = true)
             @FormParam("password") String password) throws InvalidHashException, CannotPerformOperationException, IOException {
         User user = dbMapper.findUserByName(username);
         if (user == null) {
+            logger.info("User not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
+        logger.info("User found: " + user.toString());
         if (!verifyPassword(password, user.getPassword())) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        NewCookie cookie = new NewCookie("X-JWT-AUTH", authService.authorizeUser(user));
+
+        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
+                authService.authorizeUser(user,password)),
+                "JWT token", 6000, false);
+        logger.error("User has logged in");
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
     }
@@ -183,9 +189,9 @@ public class RestServiceImpl implements RestService {
             logger.info("User not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-
+        logger.info("User found: "+user.toString());
         List<TodoList> todos = dbMapper.findListsByUserId(userId);
-        logger.info(todos.toString());
+        logger.info("List added: "+todos.toString());
         return Response.ok(todos).build();
     }
 
@@ -203,7 +209,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response createOrEditItem(@ApiParam(value = "Item data", required = true) Item item) throws IOException {
         dbMapper.insertOrUpdateItem(item);
-        logger.info(item.toString());
+        logger.info("Item added: "+item.toString());
         return  Response.ok(objectMapper.writeValueAsString(item.getId())).build();
     }
 
@@ -226,8 +232,10 @@ public class RestServiceImpl implements RestService {
             logger.info("List not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+        logger.info("List found: "+list.toString());
+
         List<Item> itemsForList = dbMapper.findItemsForList(listId);
-        logger.info(itemsForList.toString());
+        logger.info("Items: "+itemsForList.toString());
         return Response.ok(itemsForList).build();
 
 
@@ -243,7 +251,7 @@ public class RestServiceImpl implements RestService {
     public Response deleteUser(@ApiParam(value = "User ID", required = true)
                                @QueryParam("user_id") Long id) {
         dbMapper.deleteUserById(id);
-        logger.info("item deleted");
+        logger.info("user deleted");
         return Response.ok().build();
     }
 

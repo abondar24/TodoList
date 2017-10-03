@@ -6,6 +6,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 public class PasswordUtil {
@@ -32,27 +33,27 @@ public class PasswordUtil {
         }
     }
 
-    public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+    private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
     // These constants may be changed without breaking existing hashes.
-    public static final int SALT_BYTE_SIZE = 24;
-    public static final int HASH_BYTE_SIZE = 18;
-    public static final int PBKDF2_ITERATIONS = 64000;
+    private static final int SALT_BYTE_SIZE = 24;
+    private static final int HASH_BYTE_SIZE = 18;
+    private static final int PBKDF2_ITERATIONS = 64000;
 
     // These constants define the encoding and may not be changed.
-    public static final int HASH_SECTIONS = 5;
-    public static final int HASH_ALGORITHM_INDEX = 0;
-    public static final int ITERATION_INDEX = 1;
-    public static final int HASH_SIZE_INDEX = 2;
-    public static final int SALT_INDEX = 3;
-    public static final int PBKDF2_INDEX = 4;
+    private static final int HASH_SECTIONS = 5;
+    private static final int HASH_ALGORITHM_INDEX = 0;
+    private static final int ITERATION_INDEX = 1;
+    private static final int HASH_SIZE_INDEX = 2;
+    private static final int SALT_INDEX = 3;
+    private static final int PBKDF2_INDEX = 4;
 
     public static String createHash(String password)
             throws CannotPerformOperationException {
         return createHash(password.toCharArray());
     }
 
-    public static String createHash(char[] password)
+    private static String createHash(char[] password)
             throws CannotPerformOperationException {
         // Generate a random salt
         SecureRandom random = new SecureRandom();
@@ -64,14 +65,13 @@ public class PasswordUtil {
         int hashSize = hash.length;
 
         // format: algorithm:iterations:hashSize:salt:hash
-        String parts = "sha1:" +
+        return "sha1:" +
                 PBKDF2_ITERATIONS +
                 ":" + hashSize +
                 ":" +
                 toBase64(salt) +
                 ":" +
                 toBase64(hash);
-        return parts;
     }
 
     public static boolean verifyPassword(String password, String correctHash)
@@ -79,7 +79,7 @@ public class PasswordUtil {
         return verifyPassword(password.toCharArray(), correctHash);
     }
 
-    public static boolean verifyPassword(char[] password, String correctHash)
+    private static boolean verifyPassword(char[] password, String correctHash)
             throws CannotPerformOperationException, InvalidHashException {
         // Decode the hash into its parameters
         String[] params = correctHash.split(":");
@@ -96,7 +96,7 @@ public class PasswordUtil {
             );
         }
 
-        int iterations = 0;
+        int iterations ;
         try {
             iterations = Integer.parseInt(params[ITERATION_INDEX]);
         } catch (NumberFormatException ex) {
@@ -113,7 +113,7 @@ public class PasswordUtil {
         }
 
 
-        byte[] salt = null;
+        byte[] salt;
         try {
             salt = fromBase64(params[SALT_INDEX]);
         } catch (IllegalArgumentException ex) {
@@ -123,7 +123,7 @@ public class PasswordUtil {
             );
         }
 
-        byte[] hash = null;
+        byte[] hash;
         try {
             hash = fromBase64(params[PBKDF2_INDEX]);
         } catch (IllegalArgumentException ex) {
@@ -134,7 +134,7 @@ public class PasswordUtil {
         }
 
 
-        int storedHashSize = 0;
+        int storedHashSize;
         try {
             storedHashSize = Integer.parseInt(params[HASH_SIZE_INDEX]);
         } catch (NumberFormatException ex) {

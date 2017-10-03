@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="list")
+@XmlRootElement
 @ApiModel(value="List", description="TodoList ")
 public class TodoList {
 
