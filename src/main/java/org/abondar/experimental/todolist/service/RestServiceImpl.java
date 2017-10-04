@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
@@ -107,8 +108,8 @@ public class RestServiceImpl implements RestService {
         logger.info("User created: " + user.toString());
 
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
-                authService.createToken(user.getUsername(), "borscht", null)),
-                "JWT token", 6000, false);
+                authService.createToken(username,"borscht",null)),
+                "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
 
@@ -123,7 +124,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Log in a user",
-            consumes = "application/x-www-urlformEncoded",
+            consumes = "application/x-www-urlform-encoded",
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
             @ApiResponse(code = 401, message = "Wrong credentials")})
@@ -146,7 +147,7 @@ public class RestServiceImpl implements RestService {
 
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.authorizeUser(user,password)),
-                "JWT token", 6000, false);
+                "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
         logger.info("User has logged in");
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();

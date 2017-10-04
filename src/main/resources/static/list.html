@@ -1,0 +1,144 @@
+
+
+<div id="todoPanel" class="panel panel-primary" ng-controller="defaultCtrl">
+
+    <div class="panel-heading">Todo's list. User: {{user.username}}</div>
+
+    <div class="panel-body">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#list-modal">
+            Create a new list
+        </button>
+
+        <button class="btn btn-danger" ng-click="deleteAllLists()">
+            Delete all lists
+        </button>
+
+        <div id="list-modal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Create a new list</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="enterListName">List name</label>
+                                <input type="text" class="form-control" id="enterListName" ng-model="newList.name"
+                                       placeholder="Enter list name">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal"
+                                ng-click="createList(newList)">Create
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div ng-repeat="list in lists">
+            <div class="panel-heading">
+                <h3>List: {{list.name}}</h3>
+                <table class="table table-responsive ">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Item</th>
+                        <th>Done</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in items">
+                        <td>{{$index + 1}}</td>
+                        <td  data-toggle="modal" href="#item-modal-update">{{item.name}}</td>
+                        <td>
+                            <input type="checkbox" value={{item.done}} ng-click="updateItem(item)">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <div id="item-modal-update" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Update an item</h4>
+                                </div>
+                                <div class="modal-body" >
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="updateItemName">Update item name</label>
+                                            <input type="text" class="form-control" id="updateItemName"
+                                                   ng-model="item.name"
+                                                   placeholder="Change item name">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" data-dismiss="modal"
+                                            ng-click="updateItem(item)">Update item
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                            ng-click="deleteItem(item)">Delete item
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </table>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#item-modal-create">
+                    Add
+                </button>
+                <button type="button" class="btn btn-primary"
+                        ng-click="clearList(list.id)">Clear selected list
+                </button>
+                <button type="button" class="btn btn-danger"
+                        ng-click="deleteList(list.id)">Delete selected list
+                </button>
+
+                <div id="item-modal-create" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Add a new list</h4>
+                            </div>
+                            <div class="modal-body" ng-init="newItem = { name: '', done:false, listId:list.id}">
+                                <form>
+                                    <div class="form-group">
+                                        <label for="enterItemName">Item name</label>
+                                        <input type="text" class="form-control" id="enterItemName"
+                                               ng-model="newItem.name"
+                                               placeholder="Enter item name">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" data-dismiss="modal"
+                                        ng-click="addItem(newItem)">Add item
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>

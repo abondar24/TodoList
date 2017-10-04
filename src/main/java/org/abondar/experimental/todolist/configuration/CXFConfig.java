@@ -6,6 +6,8 @@ import org.abondar.experimental.todolist.service.*;
 import org.apache.cxf.Bus;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.bus.spring.SpringBus;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.interceptor.security.SecureAnnotationsInterceptor;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.swagger.Swagger2Feature;
@@ -63,6 +65,8 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
         factory.setProvider(jsonProvider);
         factory.setProvider(authenticationFilter(authService));
         factory.setProvider(secureAnnotationsInterceptor());
+        factory.setInInterceptors(Collections.singletonList(new LoggingInInterceptor()));
+        factory.setOutInterceptors(Collections.singletonList(new LoggingOutInterceptor()));
 
         factory.setFeatures(Collections.singletonList(createSwaggerFeature()));
         Map<Object, Object> extMappings = new HashMap<>();
