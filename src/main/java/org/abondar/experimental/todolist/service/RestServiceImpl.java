@@ -88,7 +88,7 @@ public class RestServiceImpl implements RestService {
             notes = "Creates a new user",
             consumes = "application/x-www-urlformEncoded",
             produces = "application/json")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "User id"),
+    @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
             @ApiResponse(code = 302, message = "Username exists")})
     @Override
     public Response createUser(@ApiParam(value = "Username", required = true)
@@ -125,6 +125,8 @@ public class RestServiceImpl implements RestService {
             value = "Log in a user",
             consumes = "application/x-www-urlformEncoded",
             produces = "application/json")
+    @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
+            @ApiResponse(code = 401, message = "Wrong credentials")})
     @Override
     public Response loginUser(
             @ApiParam(value = "username", required = true)
@@ -145,11 +147,38 @@ public class RestServiceImpl implements RestService {
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.authorizeUser(user,password)),
                 "JWT token", 6000, false);
-        logger.error("User has logged in");
+        logger.info("User has logged in");
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
     }
 
+
+    @GET
+    @Path("/logout_user")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Log out a user",
+            produces = "application/json")
+    @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
+            @ApiResponse(code = 404, message = "User not found")})
+    @Override
+    public Response logoutUser(
+            @ApiParam(value = "user_id", required = true)
+            @QueryParam("user_id") Long userId) throws IOException {
+        User user = dbMapper.findUserById(userId);
+        if (user == null) {
+            logger.info("User not found");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        logger.info("User found: " + user.toString());
+
+        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH", ""),
+                "JWT token", 6000, false);
+        logger.info("User has logged out");
+        return Response.ok().cookie(cookie).build();
+    }
 
     @POST
     @Path("/create_list")
@@ -246,7 +275,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Delete selected user")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "User deleted")})
     @Override
     public Response deleteUser(@ApiParam(value = "User ID", required = true)
                                @QueryParam("user_id") Long id) {
@@ -260,7 +289,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Delete selected item")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Item deleted")})
     @Override
     public Response deleteItem(@ApiParam(value = "Item ID", required = true)
                                @QueryParam("item_id") Long id) {
@@ -274,7 +303,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Clear selected list")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "List cleared")})
     @Override
     public Response clearList(@ApiParam(value = "List ID", required = true)
                               @QueryParam("list_id") Long listId) {
@@ -288,7 +317,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Delete selected list")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "List deleted")})
     @Override
     public Response deleteList(@ApiParam(value = "List ID", required = true)
                                @QueryParam("list_id") Long id) {

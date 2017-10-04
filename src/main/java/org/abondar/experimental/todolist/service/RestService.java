@@ -16,6 +16,9 @@ public interface RestService {
 
     public Response loginUser(String username, String password) throws InvalidHashException,CannotPerformOperationException,IOException;
 
+    public Response logoutUser(Long userId) throws IOException;
+
+
     public Response createOrEditList(TodoList list)throws IOException;
 
     public Response getListsByUser(Long userId);

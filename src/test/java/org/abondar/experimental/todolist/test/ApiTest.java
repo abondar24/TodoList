@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.abondar.experimental.todolist.app.Application;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
@@ -16,7 +15,6 @@ import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSBindingFactory;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.apache.cxf.transport.local.LocalConduit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +33,6 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -142,10 +139,8 @@ public class ApiTest {
 
         response = client.post(form);
         assertEquals(202, response.getStatus());
-        cookie = response.getCookies().get("X-JWT-AUTH");
         Long id = response.readEntity(Long.class);
 
-        assertEquals(token, cookie.getValue());
         assertEquals(userId, id);
 
 
@@ -165,7 +160,6 @@ public class ApiTest {
         Form form = new Form();
         form.param("username", username);
         form.param("password", password);
-
 
         client.path("/login_user").accept(MediaType.APPLICATION_JSON);
         Response response = client.post(form);
@@ -203,6 +197,46 @@ public class ApiTest {
                 .param("password", "aaaaaa");
         response = client.post(form);
         assertEquals(401, response.getStatus());
+
+
+    }
+
+
+    @Test
+    public void testLogOutUser() {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+        Form form = new Form()
+                .param("username", username)
+                .param("password", password);
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+        Response response = client.post(form);
+        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
+        String token = cookie.getValue();
+        Long userId = response.readEntity(Long.class);
+
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/login_user").accept(MediaType.APPLICATION_JSON).header("Authorization", "JWT " + token);
+        client.post(form);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/logout_user")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+        client.query("user_id",userId.toString());
+        response=client.get();
+        cookie = response.getCookies().get("X-JWT-AUTH");
+
+        assertEquals(200, response.getStatus());
+        assertEquals("", cookie.getValue());
 
 
     }
