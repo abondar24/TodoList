@@ -1,8 +1,8 @@
 angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
     .constant("baseURL", "http://localhost:8024/cxf/todo_list")
     .config(["$httpProvider", "$routeProvider", function ($httpProvider, $routeProvider) {
-        //$httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
-
+        $httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
+        $httpProvider.defaults.withCredentials = true;
         $routeProvider.when('/', {
             templateUrl: 'login.html'
         })
@@ -13,8 +13,11 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 redirectTo: '/'
             });
     }])
+    .run(function($rootScope) {
+        $rootScope.user = {id: 0, username: ""};
 
-    .controller("defaultCtrl", function ($scope, $http, baseURL, $cookies, $location) {
+    })
+    .controller("defaultCtrl", function ($scope,$rootScope, $http, baseURL, $cookies, $location) {
         $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
 
         $scope.alertType = "";
@@ -26,7 +29,6 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         //should filled with func from rest
         $scope.lists = [];
 
-        $scope.user = {id: 0, username: ""};
 
         $scope.createUser = function (user) {
             $http({
@@ -39,14 +41,14 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                         str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
                     return str.join("&");
                 },
-                withCredentials: true,
                 data: {username: user.username, password: user.password}
             }).then(function success(response) {
                     $scope.alertType = "";
-                    $scope.user.username = user.username;
-                    $scope.user.id = response.data;
+                    $rootScope.user.username = user.username;
+                    $rootScope.user.id = response.data;
+                    console.log($cookies.getAll());
+                    console.log($cookies.get("session"));
                     $location.path("/list");
-                    window.alert($cookies.get("X-JWT-AUTH"));
                 },
 
                 function error(response) {
@@ -57,8 +59,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                     if (response.status === 500) {
                         $scope.alertType = $scope.alerts[2];
                     }
-                }
-            );
+                });
 
         };
 
@@ -78,11 +79,9 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 data: {username: user.username, password: user.password}
             }).then(function success(response) {
                     $scope.alertType = "";
-                    $scope.user.username = user.username;
-                    $scope.user.id = response.data;
+                    $rootScope.user.username = user.username;
+                    $rootScope.user.id = response.data;
                     $location.path("/list");
-                    window.alert($cookies.get("X-JWT-AUTH"));
-
                 },
 
                 function error(response) {
@@ -102,12 +101,22 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         };
 
         $scope.createList = function (newList) {
-            $scope.lists.push({
+            $http({
+                method: 'POST',
+                url: baseURL + "/create_list",
+                headers: {'Content-Type': 'application/json',
+                'Authorization': $cookies.get("X-JWT-AUTH")},
+                withCredentials: true,
+                data: {username: user.username, password: user.password}
+            }).then(function success(response) {
+                    $scope.lists.push({
 
-                id: newList.id,
-                name: newList.name,
-                userId: $scope.user.id
-            });
+                        id: response.data,
+                        name: newList.name,
+                        userId: $scope.user.id
+                    });
+                });
+
 
 
             //add http post for new list
@@ -166,19 +175,4 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
             }
             return arr;
         };
-
-
-        $scope.setScreen = function (index) {
-
-            $scope.current = $scope.screens[index];
-
-        };
-
-        $scope.getScreen = function () {
-
-            return $scope.current === "List" ? 'list.html' : 'login.html';
-
-        };
-
-    })
-;
+    });
