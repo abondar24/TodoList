@@ -17,19 +17,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         $rootScope.user = {id: 0, username: ""};
 
     })
-    .controller("defaultCtrl", function ($scope,$rootScope, $http, baseURL, $cookies, $location) {
-        $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
-
-        $scope.alertType = "";
-
-
-        //should filled with func from rest
-        $scope.items = [];
-
-        //should filled with func from rest
-        $scope.lists = [];
-
-
+    .controller("loginCtrl",function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
         $scope.createUser = function (user) {
             $http({
                 method: 'POST',
@@ -46,8 +34,6 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                     $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
-                    console.log($cookies.getAll());
-                    console.log($cookies.get("session"));
                     $location.path("/list");
                 },
 
@@ -100,6 +86,21 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
 
         };
 
+    })
+    .controller("listCtrl", function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
+        $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
+
+        $scope.alertType = "";
+
+
+        //should filled with func from rest
+        $scope.items = [];
+
+        //should filled with func from rest
+        $scope.lists = [];
+
+
+
         $scope.createList = function (newList) {
             $http({
                 method: 'POST',
@@ -107,13 +108,13 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 headers: {'Content-Type': 'application/json',
                 'Authorization': $cookies.get("X-JWT-AUTH")},
                 withCredentials: true,
-                data: {username: user.username, password: user.password}
+                data: {name: newList.name,userId:$rootScope.user.id}
             }).then(function success(response) {
                     $scope.lists.push({
 
                         id: response.data,
                         name: newList.name,
-                        userId: $scope.user.id
+                        userId: $rootScope.user.id
                     });
                 });
 
