@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,8 +65,7 @@ public class CXFConfig extends WebMvcConfigurerAdapter {
 
         factory.setProvider(jsonProvider);
         factory.setProvider(authenticationFilter(authService));
-        factory.setProvider(secureAnnotationsInterceptor());
-        factory.setInInterceptors(Collections.singletonList(new LoggingInInterceptor()));
+        factory.setInInterceptors(Arrays.asList(new LoggingInInterceptor(),secureAnnotationsInterceptor()));
         factory.setOutInterceptors(Collections.singletonList(new LoggingOutInterceptor()));
 
         factory.setFeatures(Collections.singletonList(createSwaggerFeature()));

@@ -1,7 +1,7 @@
 
 <div id="todoPanel" class="panel panel-primary" ng-controller="listCtrl">
 
-    <div class="panel-heading">Todo's list. User: {{user.username}}</div>
+    <div class="panel-heading" ng-init="fillLists()">Todo's list. User: {{user.username}}</div>
 
     <div class="panel-body">
         <button class="btn btn-primary" data-toggle="modal" data-target="#list-modal">

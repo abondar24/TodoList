@@ -87,7 +87,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         };
 
     })
-    .controller("listCtrl", function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
+    .controller("listCtrl", function ($scope, $rootScope, $http, baseURL, $cookies) {
         $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
 
         $scope.alertType = "";
@@ -96,17 +96,31 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         //should filled with func from rest
         $scope.items = [];
 
-        //should filled with func from rest
         $scope.lists = [];
+        $scope.fillLists = function () {
+            $http({
+                method: 'GET',
+                url: baseURL + "/get_lists_by_user_id",
+                headers: {
+                    Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
+                params:{user_id:$rootScope.user.id}
+            }).then(function success(response) {
+                $scope.lists=response.data;
+            });
+        };
+
+
 
 
 
         $scope.createList = function (newList) {
+
             $http({
                 method: 'POST',
                 url: baseURL + "/create_list",
-                headers: {'Content-Type': 'application/json',
-                'Authorization': $cookies.get("X-JWT-AUTH")},
+                headers: {
+                    'Content-Type': 'application/json',
+                Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
                 withCredentials: true,
                 data: {name: newList.name,userId:$rootScope.user.id}
             }).then(function success(response) {
@@ -118,14 +132,25 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                     });
                 });
 
-
-
-            //add http post for new list
         };
 
         $scope.addItem = function (item) {
-            $scope.items.push({name: item.name, done: false, listId: item.listId});
-            //add http post for new list
+            $http({
+                method: 'POST',
+                url: baseURL + "/create_item",
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
+                withCredentials: true,
+                data: {name: item.name,done:item.done,listId:item.listId}
+            }).then(function success(response) {
+                $scope.items.push({
+                    id:response.data,
+                    name: item.name,
+                    done: item.done,
+                    listId: item.listId});
+            });
+
         };
 
         $scope.updateItem = function (item) {
