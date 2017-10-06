@@ -13,11 +13,11 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 redirectTo: '/'
             });
     }])
-    .run(function($rootScope) {
+    .run(function ($rootScope) {
         $rootScope.user = {id: 0, username: ""};
 
     })
-    .controller("loginCtrl",function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
+    .controller("loginCtrl", function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
         $scope.createUser = function (user) {
             $http({
                 method: 'POST',
@@ -102,14 +102,52 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 method: 'GET',
                 url: baseURL + "/get_lists_by_user_id",
                 headers: {
-                    Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
-                params:{user_id:$rootScope.user.id}
+                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                },
+                params: {user_id: $rootScope.user.id}
             }).then(function success(response) {
-                $scope.lists=response.data;
+                $scope.lists = response.data;
+
+                var listIds= [];
+                if ($scope.lists.length > 0) {
+                    for (var i = 0; i < $scope.lists.length; i++) {
+                        listIds.push($scope.lists[i].id);
+                    }
+
+                    fillItems(listIds);
+                }
             });
         };
 
+        $scope.fillItems = function (listIds) {
 
+            if (listIds.length===1){
+                $http({
+                    method: 'GET',
+                    url: baseURL + "/get_items_for_list",
+                    headers: {
+                        Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                    },
+                    params:{list_id:listIds.get[0]}
+                }).then(function success(response){
+                    $scope.items = response.data;
+                });
+
+            } else {
+                $http({
+                    method: 'POST',
+                    url: baseURL + "/get_items_for_lists",
+                    headers: {
+                        Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                    },
+                    data:listIds
+                }).then(function success(response){
+                    $scope.items = response.data;
+                });
+
+            }
+
+        };
 
 
 
@@ -120,17 +158,18 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 url: baseURL + "/create_list",
                 headers: {
                     'Content-Type': 'application/json',
-                Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
+                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                },
                 withCredentials: true,
-                data: {name: newList.name,userId:$rootScope.user.id}
+                data: {name: newList.name, userId: $rootScope.user.id}
             }).then(function success(response) {
-                    $scope.lists.push({
+                $scope.lists.push({
 
-                        id: response.data,
-                        name: newList.name,
-                        userId: $rootScope.user.id
-                    });
+                    id: response.data,
+                    name: newList.name,
+                    userId: $rootScope.user.id
                 });
+            });
 
         };
 
@@ -140,15 +179,17 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                 url: baseURL + "/create_item",
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization:'JWT '+ $cookies.get("X-JWT-AUTH")},
+                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                },
                 withCredentials: true,
-                data: {name: item.name,done:item.done,listId:item.listId}
+                data: {name: item.name, done: item.done, listId: item.listId}
             }).then(function success(response) {
                 $scope.items.push({
-                    id:response.data,
+                    id: response.data,
                     name: item.name,
                     done: item.done,
-                    listId: item.listId});
+                    listId: item.listId
+                });
             });
 
         };
