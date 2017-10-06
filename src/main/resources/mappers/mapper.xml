@@ -167,6 +167,16 @@
         WHERE lst.id = #{listId}
     </select>
 
+    <select id="findItemsForLists" resultMap="itemMap">
+        SELECT
+        <include refid="itemFields"/>
+        FROM
+        <include refid="itemTable"/>
+        JOIN todo_list lst on lst.id = list_id
+        WHERE lst.id  in
+        (<foreach collection="listIds" item="param1" separator=",">#{param1}</foreach>)
+    </select>
+
     <delete id="deleteAllItems">
         DELETE FROM item
     </delete>

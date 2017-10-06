@@ -7,6 +7,7 @@ import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 
 public interface RestService {
 
@@ -26,6 +27,8 @@ public interface RestService {
     public Response createOrEditItem(Item item)throws IOException;
 
     public Response getItemsForList(Long listId);
+
+    public Response getItemsForLists(List<Long> listIds);
 
     public Response deleteUser(Long id);
 

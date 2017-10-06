@@ -19,6 +19,7 @@ public interface DatabaseMapper {
     Item findItemById(@Param("id") Long  id);
     List<Item> findItemsForList(@Param("listId") Long listId);
     List<TodoList> findListsByUserId(@Param("userId") Long userId);
+    List<Item> findItemsForLists(@Param("listIds")List<Long> listLids);
     void deleteAllUsers();
     void deleteAllLists();
     void deleteAllItems();

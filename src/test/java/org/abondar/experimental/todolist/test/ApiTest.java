@@ -25,10 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.util.*;
 
@@ -415,6 +412,79 @@ public class ApiTest {
         assertEquals(1, itemsForList.size());
         assertEquals(item.getName(), itemsForList.get(0).getName());
     }
+
+
+    @Test
+    public void testGetItemsForLists() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+        Response response = client.post(new Form()
+                .param("username", "alex")
+                .param("password", "salo"));
+        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
+        String token = cookie.getValue();
+        Long userId = response.readEntity(Long.class);
+
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_list")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        TodoList list = new TodoList("list1", userId);
+        response = client.post(list);
+        Long listId = response.readEntity(Long.class);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_item")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        Item item = new Item("item1", false, listId);
+        client.post(item);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_list")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        TodoList list1 = new TodoList("list1", userId);
+        response = client.post(list1);
+        Long list1Id = response.readEntity(Long.class);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_item")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        Item item1 = new Item("item2", false, list1Id);
+        client.post(item1);
+
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/get_items_for_lists")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+        response = client.post(Arrays.asList(listId,list1Id));
+        assertEquals(200, response.getStatus());
+
+        List<Item> itemsForList = objectMapper.readValue(response.readEntity(String.class),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, Item.class));
+        assertEquals(2, itemsForList.size());
+        assertEquals(item.getName(), itemsForList.get(0).getName());
+        assertEquals(item1.getName(), itemsForList.get(1).getName());
+    }
+
 
 
     @Test

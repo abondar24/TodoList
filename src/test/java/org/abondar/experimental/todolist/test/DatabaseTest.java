@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -189,6 +191,40 @@ public class DatabaseTest {
         assertEquals(1, foundItems.size());
         assertEquals(item.getName(), foundItems.get(0).getName());
         assertEquals(foundById.getId(), foundById.getId());
+
+
+    }
+
+
+
+    @Test
+    public void testFindItemsForLists() {
+        logger.info("Insert item test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+
+        User user = new User("alex", "alex1");
+        mapper.insertOrUpdateUser(user);
+
+        TodoList list = new TodoList("Salo", user.getId());
+        mapper.insertOrUpdateList(list);
+
+        Item item = new Item("eat", false, list.getId());
+        mapper.insertOrUpdateItem(item);
+
+
+        TodoList list1 = new TodoList("Salo1", user.getId());
+        mapper.insertOrUpdateList(list1);
+        Item item1 = new Item("eat1", false, list1.getId());
+        mapper.insertOrUpdateItem(item1);
+
+
+        List<Item> itemsByLists = mapper.findItemsForLists(Arrays.asList(list.getId(),list1.getId()));
+
+        assertEquals(2, itemsByLists.size());
+        assertEquals(item.getName(), itemsByLists.get(0).getName());
+        assertEquals(item1.getName(), itemsByLists.get(1).getName());
 
 
     }

@@ -271,6 +271,27 @@ public class RestServiceImpl implements RestService {
 
     }
 
+    @POST
+    @Path("/get_items_for_lists")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Find all items for lists",
+            produces = "application/json",
+            response = Item.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Lists of items")
+    })
+    @Override
+    public Response getItemsForLists(List<Long> listIds) {
+
+        List<Item> itemsForLists = dbMapper.findItemsForLists(listIds);
+        logger.info("Items: "+itemsForLists.toString());
+        return Response.ok(itemsForLists).build();
+
+
+    }
+
     @GET
     @Path("/delete_user")
     @ApiOperation(
