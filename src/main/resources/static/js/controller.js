@@ -140,9 +140,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
             $http({
                 method: 'GET',
                 url: baseURL + '/get_lists_by_user_id',
-                headers: {
-                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
-                },
                 params: {user_id: $rootScope.user.id}
             }).then(function success(response) {
                 $scope.lists = response.data;
@@ -164,9 +161,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
                 $http({
                     method: 'GET',
                     url: baseURL + '/get_items_for_list',
-                    headers: {
-                        Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
-                    },
                     params:{list_id:listIds.get[0]}
                 }).then(function success(response){
                     $scope.items = response.data;
@@ -176,9 +170,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
                 $http({
                     method: 'POST',
                     url: baseURL + '/get_items_for_lists',
-                    headers: {
-                        Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
-                    },
                     data:listIds
                 }).then(function success(response){
                     $scope.items = response.data;
@@ -191,13 +182,11 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
 
 
         $scope.createList = function (newList) {
-
             $http({
                 method: 'POST',
                 url: baseURL + '/create_list',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
+                    'Content-Type': 'application/json'
                 },
                 withCredentials: true,
                 data: {name: newList.name, userId: $rootScope.user.id}
@@ -217,8 +206,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
                 method: 'POST',
                 url: baseURL + '/create_item',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
+                    'Content-Type': 'application/json'
                 },
                 withCredentials: true,
                 data: {name: item.name, done: item.done, listId: item.listId}
