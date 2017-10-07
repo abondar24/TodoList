@@ -126,13 +126,11 @@ public class ApiTest {
 
         client.path("/create_user").accept(MediaType.APPLICATION_JSON);
         Response response = client.post(form);
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/login_user").accept(MediaType.APPLICATION_JSON).header("Authorization", "JWT " + token);
+        client.path("/login_user").accept(MediaType.APPLICATION_JSON);
 
         response = client.post(form);
         assertEquals(202, response.getStatus());
@@ -183,11 +181,10 @@ public class ApiTest {
         client.path("/create_user").accept(MediaType.APPLICATION_JSON);
         Response response = client.post(form);
         NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/login_user").accept(MediaType.APPLICATION_JSON).header("Authorization", "JWT " + token);
+        client.path("/login_user").accept(MediaType.APPLICATION_JSON);
 
         form = new Form()
                 .param("username", username)
@@ -215,22 +212,20 @@ public class ApiTest {
 
         client.path("/create_user").accept(MediaType.APPLICATION_JSON);
         Response response = client.post(form);
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
+
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/login_user").accept(MediaType.APPLICATION_JSON).header("Authorization", "JWT " + token);
+        client.path("/login_user").accept(MediaType.APPLICATION_JSON);
         client.post(form);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/logout_user")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         client.query("user_id",userId.toString());
         response=client.get();
-        cookie = response.getCookies().get("X-JWT-AUTH");
+        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
 
         assertEquals(200, response.getStatus());
         assertEquals("", cookie.getValue());
@@ -251,16 +246,13 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -284,16 +276,13 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         TodoList list = new TodoList("list1", userId);
         client.post(list);
 
@@ -301,8 +290,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/get_lists_by_user_id")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         client.query("user_id", userId.toString());
 
@@ -328,16 +316,13 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         client.post(list);
@@ -345,8 +330,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item = new Item("item1", false, list.getId());
 
@@ -372,16 +356,13 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -390,8 +371,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item = new Item("item1", false, listId);
         client.post(item);
@@ -400,8 +380,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/get_items_for_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         client.query("list_id", listId.toString());
         response = client.get();
@@ -426,16 +405,13 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -444,8 +420,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item = new Item("item1", false, listId);
         client.post(item);
@@ -453,8 +428,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list1 = new TodoList("list1", userId);
         response = client.post(list1);
@@ -463,8 +437,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item1 = new Item("item2", false, list1Id);
         client.post(item1);
@@ -473,8 +446,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/get_items_for_lists")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         response = client.post(Arrays.asList(listId,list1Id));
         assertEquals(200, response.getStatus());
 
@@ -498,15 +470,12 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/delete_user")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         client.query("user_id",userId.toString());
 
         response = client.get();
@@ -526,15 +495,12 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -543,8 +509,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item = new Item("item1", false, listId);
         response = client.post(item);
@@ -554,8 +519,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         item = new Item("item2", false, listId);
         client.post(item);
@@ -563,8 +527,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/delete_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         client.query("item_id",item1Id.toString());
 
         response = client.get();
@@ -588,15 +551,12 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -605,8 +565,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         Item item = new Item("item1", false, listId);
         client.post(item);
@@ -614,8 +573,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_item")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         item = new Item("item2", false, listId);
         client.post(item);
@@ -623,8 +581,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/clear_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         client.query("list_id",listId.toString());
 
         response = client.get();
@@ -647,15 +604,12 @@ public class ApiTest {
         Response response = client.post(new Form()
                 .param("username", "alex")
                 .param("password", "salo"));
-        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
-        String token = cookie.getValue();
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/create_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
 
         TodoList list = new TodoList("list1", userId);
         response = client.post(list);
@@ -665,8 +619,7 @@ public class ApiTest {
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/delete_list")
                 .type(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "JWT " + token);
+                .accept(MediaType.APPLICATION_JSON);
         client.query("list_id",listId.toString());
 
         response = client.get();
