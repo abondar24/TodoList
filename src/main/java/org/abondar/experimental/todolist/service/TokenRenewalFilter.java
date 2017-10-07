@@ -3,7 +3,6 @@ package org.abondar.experimental.todolist.service;
 import org.apache.cxf.jaxrs.utils.JAXRSUtils;
 import org.apache.cxf.rs.security.jose.common.JoseException;
 import org.apache.cxf.rs.security.jose.jaxrs.JwtAuthenticationFilter;
-import org.apache.cxf.rs.security.jose.jaxrs.JwtCookieAuthenticationFilter;
 import org.apache.cxf.rs.security.jose.jwt.JwtToken;
 import org.apache.cxf.security.SecurityContext;
 
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import java.io.IOException;
 
-public class TokenRenewalFilter extends JwtCookieAuthenticationFilter {
+public class TokenRenewalFilter extends JwtAuthenticationFilter {
 
     private AuthService authService;
     private static final String DEFAULT_AUTH_SCHEME = "JWT";

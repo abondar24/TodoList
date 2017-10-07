@@ -110,7 +110,7 @@ public class RestServiceImpl implements RestService {
         logger.info("User created: " + user.toString());
 
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
-                authService.createToken(username,"borscht",null)),
+                authService.createToken(username,"borscht",null),"/",null),
                 "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();

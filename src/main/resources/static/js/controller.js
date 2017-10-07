@@ -41,7 +41,10 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                     $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
-                    $location.path('/list');
+
+                    if ($cookies.get('X-JWT-AUTH') !== undefined) {
+                        $location.path('/list');
+                    }
                 },
 
                 function error(response) {
@@ -74,7 +77,9 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                     $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
-                    $location.path('/list');
+                    if ($cookies.get('X-JWT-AUTH') !== undefined) {
+                        $location.path('/list');
+                    }
                 },
 
                 function error(response) {
@@ -95,7 +100,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
 
     })
 
-    .controller('modalCtrl', function ($scope,$rootScope,$http,baseURL, $uibModalInstance) {
+    .controller('modalCtrl', function ($scope, $rootScope, $http, baseURL, $uibModalInstance, $cookies) {
 
         $scope.createList = function (newList) {
             $uibModalInstance.close();
@@ -103,7 +108,8 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 method: 'POST',
                 url: baseURL + '/create_list',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: $cookies.get('X-JWT-AUTH')
                 },
                 withCredentials: true,
                 data: {name: newList.name, userId: $rootScope.user.id}
@@ -124,7 +130,8 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 method: 'POST',
                 url: baseURL + '/create_item',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: $cookies.get('X-JWT-AUTH')
                 },
                 withCredentials: true,
                 data: {name: item.name, done: item.done, listId: item.listId}
@@ -152,7 +159,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
 
 
     })
-    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal) {
+    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal,$cookies) {
 
         $scope.listWindow = function () {
             $uibModal.open(
@@ -190,11 +197,12 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         };
 
 
-         function fillItems (listIds) {
+        function fillItems(listIds) {
             if (listIds.length === 1) {
                 $http({
                     method: 'GET',
                     url: baseURL + '/get_items_for_list',
+                    Authorization: $cookies.get('X-JWT-AUTH'),
                     params: {list_id: listIds[0]}
                 }).then(function success(response) {
                     $rootScope.items = response.data;
@@ -204,6 +212,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 $http({
                     method: 'POST',
                     url: baseURL + '/get_items_for_lists',
+                    Authorization: $cookies.get('X-JWT-AUTH'),
                     data: listIds
                 }).then(function success(response) {
                     $rootScope.items = response.data;
@@ -217,6 +226,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $http({
                 method: 'GET',
                 url: baseURL + '/get_lists_by_user_id',
+                Authorization: $cookies.get('X-JWT-AUTH'),
                 params: {user_id: $rootScope.user.id}
             }).then(function success(response) {
                 $rootScope.lists = response.data;
