@@ -10,6 +10,7 @@ import org.abondar.experimental.todolist.mapper.DatabaseMapper;
 
 import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import java.util.List;
 
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
 @Path("/")
+@CrossOriginResourceSharing
 @SwaggerDefinition(
         info = @Info(
                 description = "Another TodoList application with Spring Boot and Swagger",

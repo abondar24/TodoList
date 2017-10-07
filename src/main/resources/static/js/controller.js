@@ -1,7 +1,6 @@
-angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
-    .constant("baseURL", "http://localhost:8024/cxf/todo_list")
-    .config(["$httpProvider", "$routeProvider", function ($httpProvider, $routeProvider) {
-        $httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
+angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap','ui.bootstrap.modal'])
+    .constant('baseURL', 'http://localhost:8024/cxf/todo_list')
+    .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
         $httpProvider.defaults.withCredentials = true;
         $routeProvider.when('/', {
             templateUrl: 'login.html'
@@ -17,11 +16,15 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         $rootScope.user = {id: 0, username: ""};
 
     })
-    .controller("loginCtrl", function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
+    .controller('loginCtrl', function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
+        $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
+
+        $scope.alertType = "";
+
         $scope.createUser = function (user) {
             $http({
                 method: 'POST',
-                url: baseURL + "/create_user",
+                url: baseURL + '/create_user',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 transformRequest: function (obj) {
                     var str = [];
@@ -34,7 +37,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                     $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
-                    $location.path("/list");
+                    $location.path('/list');
                 },
 
                 function error(response) {
@@ -53,7 +56,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         $scope.loginUser = function (user) {
             $http({
                 method: 'POST',
-                url: baseURL + "/login_user",
+                url: baseURL + '/login_user',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 transformRequest: function (obj) {
                     var str = [];
@@ -67,7 +70,7 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
                     $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
-                    $location.path("/list");
+                    $location.path('/list');
                 },
 
                 function error(response) {
@@ -87,22 +90,58 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         };
 
     })
-    .controller("listCtrl", function ($scope, $rootScope, $http, baseURL, $cookies) {
-        $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
+    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $cookies,$uibModal) {
 
-        $scope.alertType = "";
 
 
         //should filled with func from rest
         $scope.items = [];
 
         $scope.lists = [];
+
+
+        $scope.listWindow = function () {
+            var listWindowInstance = $uibModal.open(
+                {
+                    templateUrl: 'listCreateModal.html',
+                    controller: 'listCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
+        $scope.itemCreateWindow = function () {
+            var itemCreateInstance = $uibModal.open(
+                {
+                    templateUrl: 'itemCreateModal.html',
+                    controller: 'listCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
+        $scope.itemUpdateWindow = function () {
+            var itemUpdateInstance = $uibModal.open(
+                {
+                    templateUrl: 'itemUpdateModal.html',
+                    controller: 'listCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
         $scope.fillLists = function () {
             $http({
                 method: 'GET',
-                url: baseURL + "/get_lists_by_user_id",
+                url: baseURL + '/get_lists_by_user_id',
                 headers: {
-                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
                 },
                 params: {user_id: $rootScope.user.id}
             }).then(function success(response) {
@@ -124,9 +163,9 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
             if (listIds.length===1){
                 $http({
                     method: 'GET',
-                    url: baseURL + "/get_items_for_list",
+                    url: baseURL + '/get_items_for_list',
                     headers: {
-                        Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                        Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
                     },
                     params:{list_id:listIds.get[0]}
                 }).then(function success(response){
@@ -136,9 +175,9 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
             } else {
                 $http({
                     method: 'POST',
-                    url: baseURL + "/get_items_for_lists",
+                    url: baseURL + '/get_items_for_lists',
                     headers: {
-                        Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                        Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
                     },
                     data:listIds
                 }).then(function success(response){
@@ -155,10 +194,10 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
 
             $http({
                 method: 'POST',
-                url: baseURL + "/create_list",
+                url: baseURL + '/create_list',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
                 },
                 withCredentials: true,
                 data: {name: newList.name, userId: $rootScope.user.id}
@@ -176,10 +215,10 @@ angular.module("todoList", ["ngRoute", "ngResource", "ngCookies"])
         $scope.addItem = function (item) {
             $http({
                 method: 'POST',
-                url: baseURL + "/create_item",
+                url: baseURL + '/create_item',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: 'JWT ' + $cookies.get("X-JWT-AUTH")
+                    Authorization: 'JWT ' + $cookies.get('X-JWT-AUTH')
                 },
                 withCredentials: true,
                 data: {name: item.name, done: item.done, listId: item.listId}

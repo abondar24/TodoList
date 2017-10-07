@@ -1,0 +1,22 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Update an item</h4>
+</div>
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <label for="updateItemName">Update item name</label>
+            <input type="text" class="form-control" id="updateItemName"
+                   ng-model="item.name"
+                   placeholder="Change item name">
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" data-dismiss="modal"
+            ng-click="updateItem(item)">Update item
+    </button>
+    <button type="button" class="btn btn-danger" data-dismiss="modal"
+            ng-click="deleteItem(item)">Delete item
+    </button>
+</div>

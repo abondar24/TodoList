@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h2>Log In</h2>
+    <div class="loginclose"  ng-click="close()"><img src="images/al-close.png" id="loginclosebut"></div>
+</div>
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <label for="enterListName">List name</label>
+            <input type="text" class="form-control" id="enterListName" ng-model="newList.name"
+                   placeholder="Enter list name">
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" data-dismiss="modal"
+            ng-click="createList(newList)">Create
+    </button>
+</div>

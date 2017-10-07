@@ -1,0 +1,19 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Add a new list</h4>
+</div>
+<div class="modal-body" ng-init="newItem = { name: '', done:false, listId:list.id}">
+    <form>
+        <div class="form-group">
+            <label for="enterItemName">Item name</label>
+            <input type="text" class="form-control" id="enterItemName"
+                   ng-model="newItem.name"
+                   placeholder="Enter item name">
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" data-dismiss="modal"
+            ng-click="addItem(newItem)">Add item
+    </button>
+</div>
