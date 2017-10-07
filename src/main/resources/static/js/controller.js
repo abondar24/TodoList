@@ -1,4 +1,4 @@
-angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap','ui.bootstrap.modal'])
+angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal'])
     .constant('baseURL', 'http://localhost:8024/cxf/todo_list')
     .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
         $httpProvider.defaults.withCredentials = true;
@@ -14,6 +14,10 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
     }])
     .run(function ($rootScope) {
         $rootScope.user = {id: 0, username: ""};
+        $rootScope.items = [];
+
+        $rootScope.lists = [];
+
 
     })
     .controller('loginCtrl', function ($scope, $rootScope, $http, baseURL, $cookies, $location) {
@@ -90,98 +94,11 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
         };
 
     })
-    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $cookies,$uibModal) {
 
-
-
-        //should filled with func from rest
-        $scope.items = [];
-
-        $scope.lists = [];
-
-
-        $scope.listWindow = function () {
-            var listWindowInstance = $uibModal.open(
-                {
-                    templateUrl: 'listCreateModal.html',
-                    controller: 'listCtrl',
-                    keyboard: true,
-                    size: 'md'
-                }
-            );
-        };
-
-
-        $scope.itemCreateWindow = function () {
-            var itemCreateInstance = $uibModal.open(
-                {
-                    templateUrl: 'itemCreateModal.html',
-                    controller: 'listCtrl',
-                    keyboard: true,
-                    size: 'md'
-                }
-            );
-        };
-
-
-        $scope.itemUpdateWindow = function () {
-            var itemUpdateInstance = $uibModal.open(
-                {
-                    templateUrl: 'itemUpdateModal.html',
-                    controller: 'listCtrl',
-                    keyboard: true,
-                    size: 'md'
-                }
-            );
-        };
-
-
-        $scope.fillLists = function () {
-            $http({
-                method: 'GET',
-                url: baseURL + '/get_lists_by_user_id',
-                params: {user_id: $rootScope.user.id}
-            }).then(function success(response) {
-                $scope.lists = response.data;
-
-                var listIds= [];
-                if ($scope.lists.length > 0) {
-                    for (var i = 0; i < $scope.lists.length; i++) {
-                        listIds.push($scope.lists[i].id);
-                    }
-
-                    fillItems(listIds);
-                }
-            });
-        };
-
-        $scope.fillItems = function (listIds) {
-
-            if (listIds.length===1){
-                $http({
-                    method: 'GET',
-                    url: baseURL + '/get_items_for_list',
-                    params:{list_id:listIds.get[0]}
-                }).then(function success(response){
-                    $scope.items = response.data;
-                });
-
-            } else {
-                $http({
-                    method: 'POST',
-                    url: baseURL + '/get_items_for_lists',
-                    data:listIds
-                }).then(function success(response){
-                    $scope.items = response.data;
-                });
-
-            }
-
-        };
-
-
+    .controller('modalCtrl', function ($scope,$rootScope,$http,baseURL, $uibModalInstance) {
 
         $scope.createList = function (newList) {
+            $uibModalInstance.close();
             $http({
                 method: 'POST',
                 url: baseURL + '/create_list',
@@ -191,7 +108,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
                 withCredentials: true,
                 data: {name: newList.name, userId: $rootScope.user.id}
             }).then(function success(response) {
-                $scope.lists.push({
+                $rootScope.lists.push({
 
                     id: response.data,
                     name: newList.name,
@@ -202,6 +119,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
         };
 
         $scope.addItem = function (item) {
+            $uibModalInstance.close();
             $http({
                 method: 'POST',
                 url: baseURL + '/create_item',
@@ -211,7 +129,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
                 withCredentials: true,
                 data: {name: item.name, done: item.done, listId: item.listId}
             }).then(function success(response) {
-                $scope.items.push({
+                $rootScope.items.push({
                     id: response.data,
                     name: item.name,
                     done: item.done,
@@ -222,7 +140,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
         };
 
         $scope.updateItem = function (item) {
-            //$http.post
+            $uibModalInstance.close();
             $scope.items.splice(item, 1);
             $scope.items.splice(item, 0, item);
 
@@ -231,6 +149,90 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies','ui.bootstrap',
             }
 
         };
+
+
+    })
+    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal) {
+
+        $scope.listWindow = function () {
+            $uibModal.open(
+                {
+                    templateUrl: 'listCreateModal.html',
+                    controller: 'modalCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
+        $scope.itemCreateWindow = function () {
+            $uibModal.open(
+                {
+                    templateUrl: 'itemCreateModal.html',
+                    controller: 'modalCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
+        $scope.itemUpdateWindow = function () {
+            $uibModal.open(
+                {
+                    templateUrl: 'itemUpdateModal.html',
+                    controller: 'modalCtrl',
+                    keyboard: true,
+                    size: 'md'
+                }
+            );
+        };
+
+
+         function fillItems (listIds) {
+            if (listIds.length === 1) {
+                $http({
+                    method: 'GET',
+                    url: baseURL + '/get_items_for_list',
+                    params: {list_id: listIds[0]}
+                }).then(function success(response) {
+                    $rootScope.items = response.data;
+                });
+
+            } else {
+                $http({
+                    method: 'POST',
+                    url: baseURL + '/get_items_for_lists',
+                    data: listIds
+                }).then(function success(response) {
+                    $rootScope.items = response.data;
+                });
+
+            }
+
+        }
+
+        $scope.fillLists = function () {
+            $http({
+                method: 'GET',
+                url: baseURL + '/get_lists_by_user_id',
+                params: {user_id: $rootScope.user.id}
+            }).then(function success(response) {
+                $rootScope.lists = response.data;
+
+
+                if ($rootScope.lists.length > 0) {
+                    var listIds = [];
+                    for (var i = 0; i < $rootScope.lists.length; i++) {
+                        listIds.push($rootScope.lists[i].id);
+                    }
+
+                    fillItems(listIds);
+                }
+            });
+        };
+
 
         $scope.deleteAllLists = function () {
             ///$http call
