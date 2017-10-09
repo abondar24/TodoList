@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -72,12 +73,11 @@ public class DatabaseTest {
         User user = new User("alex", "alex1");
         mapper.insertOrUpdateUser(user);
 
+        Long userId = user.getId();
         user.setPassword("alex21");
         mapper.insertOrUpdateUser(user);
-        User foundUser = mapper.findUserById(user.getId());
 
-        assertEquals(user.getId(),foundUser.getId());
-        assertEquals(foundUser.getPassword(), user.getPassword());
+        assertEquals(userId,user.getId());
 
     }
 
@@ -133,12 +133,12 @@ public class DatabaseTest {
         TodoList list = new TodoList("Salo", user.getId());
         mapper.insertOrUpdateList(list);
 
+        Long listId = list.getId();
         list.setName("asasa");
         mapper.insertOrUpdateList(list);
 
-        TodoList actualUpd = mapper.findListById(list.getId());
 
-        assertEquals(list.getId(), actualUpd.getId());
+        assertEquals(listId,list.getId());
 
 
     }
@@ -265,7 +265,6 @@ public class DatabaseTest {
         mapper.deleteAllUsers();
 
         User user = new User("alex", "alex1");
-
         mapper.insertOrUpdateUser(user);
 
         TodoList list = new TodoList("Salo", user.getId());
@@ -274,11 +273,12 @@ public class DatabaseTest {
         Item item = new Item("eat", false, list.getId());
         mapper.insertOrUpdateItem(item);
 
+        Long id = item.getId();
         item.setDone(true);
         mapper.insertOrUpdateItem(item);
 
-       Item upd = mapper.findItemById(item.getId());
-        assertEquals(true, upd.getDone());
+        assertEquals(id,item.getId());
+
     }
 
 

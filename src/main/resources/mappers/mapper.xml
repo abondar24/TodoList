@@ -24,8 +24,9 @@
 
     <insert id="insertOrUpdateUser" useGeneratedKeys="true" keyColumn="id" keyProperty="user.id" >
         INSERT INTO
-        user (username, password)
+        user (id,username, password)
         VALUES (
+        #{user.id},
         #{user.username},
         #{user.password}
         )
@@ -79,8 +80,9 @@
 
     <insert id="insertOrUpdateList" useGeneratedKeys="true" keyColumn="id" keyProperty="todoList.id">
         INSERT INTO
-        todo_list (name, user_id)
+        todo_list (id,name, user_id)
         VALUES (
+        #{todoList.id},
         #{todoList.name},
         #{todoList.userId}
         )
@@ -143,8 +145,9 @@
 
     <insert id="insertOrUpdateItem" useGeneratedKeys="true" keyColumn="id" keyProperty="item.id">
         INSERT INTO
-        item (name,done,list_id)
+        item (id,name,done,list_id)
         VALUES (
+        #{item.id},
         #{item.name},
         #{item.done},
         #{item.listId}
