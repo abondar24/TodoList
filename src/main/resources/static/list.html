@@ -31,7 +31,7 @@
                             <td ng-if="item.listId==list.id" editable-text="item.name"
                                 onaftersave="updateItem(item)">{{item.name || "empty"}}</td>
                             <td ng-if="item.listId==list.id">
-                                <input type="checkbox" value={{item.done}} ng-click="updateItem(item)">
+                                <input type="checkbox" value={{item.done}} ng-model="item.done" ng-click="updateItem(item)">
                                 &nbsp;
                             </td>
                         <td>

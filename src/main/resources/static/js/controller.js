@@ -157,7 +157,9 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 params: {item_id:$rootScope.curItem.id}
             }).then(function success(response) {
                 var index = $rootScope.items.indexOf($rootScope.curItem);
-                $rootScope.items.splice(index,1);
+                if (index>-1){
+                    $rootScope.items.splice(index,1);
+                }
             });
 
         };
