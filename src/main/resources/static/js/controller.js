@@ -255,9 +255,32 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             });
         };
 
+        $scope.updateList = function (list) {
+            $http({
+                method: 'POST',
+                url: baseURL + '/create_update_list',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: $cookies.get('X-JWT-AUTH')
+                },
+                withCredentials: true,
+                data: {id:list.id, name: list.name, userId: list.userId}
+            }).then(function success(response) {
+                if (response.status===200){
+                    for (var i=0;i<$rootScope.lists.length;i++){
+                        if ($rootScope.lists[i].id===list.id){
+                            $rootScope.lists[i].name=list.name;
+                        }
+                    }
+                }
+
+            });
+
+
+        };
+
 
         $scope.updateItem = function (item) {
-            console.log(item);
             $http({
                 method: 'POST',
                 url: baseURL + '/create_update_item',

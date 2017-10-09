@@ -15,7 +15,7 @@
 
         <div ng-repeat="list in lists">
             <div class="panel-heading">
-                <h3>List: {{list.name}}</h3>
+                <h3 editable-text="list.name" onaftersave="updateList(list)">List: {{list.name || "empty"}}</h3>
                 <table class="table table-responsive ">
                     <thead>
                     <tr>
