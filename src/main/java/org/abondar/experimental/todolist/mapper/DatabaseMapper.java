@@ -27,5 +27,5 @@ public interface DatabaseMapper {
     void deleteListById(@Param("id")Long id);
     void deleteItemById(@Param("id")Long id);
     void deleteItemsForList(@Param("listId")Long listId);
-
+    void deleteListsForUser(@Param("userId") Long userId);
 }

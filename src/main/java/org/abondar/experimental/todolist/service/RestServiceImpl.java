@@ -10,7 +10,6 @@ import org.abondar.experimental.todolist.mapper.DatabaseMapper;
 
 import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 
-import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +24,10 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
 @Path("/")
-@CrossOriginResourceSharing
 @SwaggerDefinition(
         info = @Info(
                 description = "Another TodoList application with Spring Boot and Swagger",
@@ -148,7 +147,7 @@ public class RestServiceImpl implements RestService {
         }
 
         NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
-                authService.authorizeUser(user,password)),
+                authService.authorizeUser(user,password),"/",null),
                 "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
         logger.info("User has logged in");
         return Response.status(Response.Status.ACCEPTED).cookie(cookie)
@@ -184,7 +183,7 @@ public class RestServiceImpl implements RestService {
     }
 
     @POST
-    @Path("/create_list")
+    @Path("/create_update_list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -228,7 +227,7 @@ public class RestServiceImpl implements RestService {
     }
 
     @POST
-    @Path("/create_item")
+    @Path("/create_update_item")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -240,6 +239,7 @@ public class RestServiceImpl implements RestService {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Item id")})
     @Override
     public Response createOrEditItem(@ApiParam(value = "Item data", required = true) Item item) throws IOException {
+
         dbMapper.insertOrUpdateItem(item);
         logger.info("Item added: "+item.toString());
         return  Response.ok(objectMapper.writeValueAsString(item.getId())).build();
@@ -303,6 +303,9 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response deleteUser(@ApiParam(value = "User ID", required = true)
                                @QueryParam("user_id") Long id) {
+
+        dbMapper.findListsByUserId(id).forEach(l-> dbMapper.deleteItemsForList(l.getId()));
+        dbMapper.deleteListsForUser(id);
         dbMapper.deleteUserById(id);
         logger.info("user deleted");
         return Response.ok().build();
@@ -345,10 +348,25 @@ public class RestServiceImpl implements RestService {
     @Override
     public Response deleteList(@ApiParam(value = "List ID", required = true)
                                @QueryParam("list_id") Long id) {
+        dbMapper.deleteItemsForList(id);
         dbMapper.deleteListById(id);
         logger.info("list deleted");
         return Response.ok().build();
     }
 
+
+    @GET
+    @Path("/delete_lists_for_user")
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Delete lists for user")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "List deleted")})
+    @Override
+    public Response deleteListsForUser(@ApiParam(value = "User ID", required = true)
+                               @QueryParam("user_id") Long id) {
+        dbMapper.deleteListsForUser(id);
+        logger.info("lists deleted");
+        return Response.ok().build();
+    }
 
 }

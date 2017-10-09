@@ -38,4 +38,6 @@ public interface RestService {
 
     public Response deleteList(Long id);
 
+    public Response deleteListsForUser(Long id);
+
 }

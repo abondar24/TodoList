@@ -76,6 +76,7 @@ public class DatabaseTest {
         mapper.insertOrUpdateUser(user);
         User foundUser = mapper.findUserById(user.getId());
 
+        assertEquals(user.getId(),foundUser.getId());
         assertEquals(foundUser.getPassword(), user.getPassword());
 
     }
@@ -165,6 +166,32 @@ public class DatabaseTest {
         assertEquals(0, foundLists.size());
 
     }
+
+
+    @Test
+    public void testDeleteListsForUser() {
+        logger.info("Delete list Test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+
+        User user = new User("alex", "alex1");
+
+        mapper.insertOrUpdateUser(user);
+
+        TodoList list = new TodoList("Salo", user.getId());
+        mapper.insertOrUpdateList(list);
+        TodoList list1 = new TodoList("Salo1", user.getId());
+        mapper.insertOrUpdateList(list1);
+
+        mapper.deleteListsForUser(user.getId());
+
+        List<TodoList> foundLists = mapper.findListsByUserId(user.getId());
+
+        assertEquals(0, foundLists.size());
+
+    }
+
 
 
     @Test

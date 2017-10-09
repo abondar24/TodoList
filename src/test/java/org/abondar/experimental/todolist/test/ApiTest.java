@@ -257,7 +257,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -290,7 +290,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -334,7 +334,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -343,7 +343,7 @@ public class ApiTest {
         client.post(list);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -378,7 +378,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -388,7 +388,7 @@ public class ApiTest {
         Long listId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -432,7 +432,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -442,7 +442,7 @@ public class ApiTest {
         Long listId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -451,7 +451,7 @@ public class ApiTest {
         client.post(item);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -461,7 +461,7 @@ public class ApiTest {
         Long list1Id = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -531,7 +531,7 @@ public class ApiTest {
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -541,7 +541,7 @@ public class ApiTest {
         Long listId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -552,7 +552,7 @@ public class ApiTest {
 
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -593,7 +593,7 @@ public class ApiTest {
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -603,7 +603,7 @@ public class ApiTest {
         Long listId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -612,7 +612,7 @@ public class ApiTest {
         client.post(item);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_item")
+        client.path("/create_update_item")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -637,6 +637,55 @@ public class ApiTest {
 
 
     @Test
+    public void testDeleteListsForUser() {
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+        Response response = client.post(new Form()
+                .param("username", "alex")
+                .param("password", "salo"));
+        NewCookie cookie = response.getCookies().get("X-JWT-AUTH");
+        String token = cookie.getValue();
+        Long userId = response.readEntity(Long.class);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_update_list")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        TodoList list = new TodoList("list1", userId);
+        client.post(list);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/create_update_list")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+
+        TodoList list1 = new TodoList("list21", userId);
+        client.post(list1);
+
+
+
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/delete_lists_for_user")
+                .type(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "JWT " + token);
+        client.query("user_id",userId.toString());
+
+        response = client.get();
+        assertEquals(200, response.getStatus());
+
+    }
+
+
+    @Test
     public void testDeleteList() {
         mapper.deleteAllItems();
         mapper.deleteAllLists();
@@ -652,7 +701,7 @@ public class ApiTest {
         Long userId = response.readEntity(Long.class);
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
-        client.path("/create_list")
+        client.path("/create_update_list")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
@@ -673,7 +722,6 @@ public class ApiTest {
         assertEquals(200, response.getStatus());
 
     }
-
 
     @After
     public void afterMethod() {

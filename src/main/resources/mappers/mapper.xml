@@ -102,8 +102,7 @@
         <include refid="listFields"/>
         FROM
         <include refid="listTable"/>
-        JOIN user usr on usr.id = user_id
-        WHERE usr.id = #{userId}
+        WHERE user_id = #{userId}
     </select>
 
 
@@ -114,6 +113,12 @@
     <delete id="deleteListById">
         DELETE FROM todo_list
         WHERE id = #{id}
+    </delete>
+
+
+    <delete id="deleteListsForUser">
+        DELETE FROM todo_list
+        WHERE user_id=#{userId}
     </delete>
 
 
@@ -146,8 +151,7 @@
         )
         ON DUPLICATE KEY UPDATE
         name       = #{item.name},
-        done    = #{item.done},
-        list_id    = #{item.listId}
+        done    = #{item.done}
     </insert>
 
     <select id="findItemById" resultMap="itemMap">

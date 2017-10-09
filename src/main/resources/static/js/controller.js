@@ -1,4 +1,4 @@
-angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal'])
+angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal','xeditable'])
     .constant('baseURL', 'http://localhost:8024/cxf/todo_list')
     .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
         $httpProvider.defaults.withCredentials = true;
@@ -12,11 +12,14 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 redirectTo: '/'
             });
     }])
-    .run(function ($rootScope) {
+    .run(function ($rootScope,editableOptions) {
+        editableOptions.theme = 'bs3';
         $rootScope.user = {id: 0, username: ""};
         $rootScope.items = [];
 
         $rootScope.lists = [];
+        $rootScope.curListId =0;
+        $rootScope.curItem={id:0,name:"",done:false,listId:0};
 
 
     })
@@ -106,7 +109,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $uibModalInstance.close();
             $http({
                 method: 'POST',
-                url: baseURL + '/create_list',
+                url: baseURL + '/create_update_list',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: $cookies.get('X-JWT-AUTH')
@@ -128,36 +131,41 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $uibModalInstance.close();
             $http({
                 method: 'POST',
-                url: baseURL + '/create_item',
+                url: baseURL + '/create_update_item',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: $cookies.get('X-JWT-AUTH')
                 },
                 withCredentials: true,
-                data: {name: item.name, done: item.done, listId: item.listId}
+                data: {name: item.name, done: item.done, listId: $rootScope.curListId}
             }).then(function success(response) {
                 $rootScope.items.push({
                     id: response.data,
                     name: item.name,
                     done: item.done,
-                    listId: item.listId
+                    listId: $rootScope.curListId
                 });
+            });
+        };
+
+        $scope.deleteItem = function () {
+            $uibModalInstance.close();
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_item',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {item_id:$rootScope.curItem.id}
+            }).then(function success(response) {
+                var index = $rootScope.items.indexOf($rootScope.curItem);
+                $rootScope.items.splice(index,1);
             });
 
         };
 
-        $scope.updateItem = function (item) {
+        $scope.cancelDeleteItem = function () {
             $uibModalInstance.close();
-            $scope.items.splice(item, 1);
-            $scope.items.splice(item, 0, item);
-
-            for (i = 0; i < $scope.items.length; i++) {
-                console.log($scope.items[i])
-            }
-
+            $rootScope.curItem={id:0,name:"",done:false,listId:0};
         };
-
-
     })
     .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal,$cookies) {
 
@@ -173,7 +181,8 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         };
 
 
-        $scope.itemCreateWindow = function () {
+        $scope.itemCreateWindow = function (listId) {
+            $rootScope.curListId=listId;
             $uibModal.open(
                 {
                     templateUrl: 'itemCreateModal.html',
@@ -185,12 +194,13 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         };
 
 
-        $scope.itemUpdateWindow = function () {
+        $scope.itemDeleteWindow = function (item) {
+            $rootScope.curItem=item;
             $uibModal.open(
                 {
-                    templateUrl: 'itemUpdateModal.html',
+                    templateUrl: 'itemDeleteModal.html',
                     controller: 'modalCtrl',
-                    keyboard: true,
+                    keyboard: false,
                     size: 'md'
                 }
             );
@@ -244,31 +254,34 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         };
 
 
-        $scope.deleteAllLists = function () {
-            ///$http call
-            $scope.lists = []
+        $scope.updateItem = function (item) {
+            console.log(item);
+            $http({
+                method: 'POST',
+                url: baseURL + '/create_update_item',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: $cookies.get('X-JWT-AUTH')
+                },
+                withCredentials: true,
+                data: {id:item.id,
+                    name: item.name, done: item.done, listId: item.listId}
+            }).then(function success(response) {
+                if (response.status===200){
+                    for (var i=0;i<$rootScope.items.length;i++){
+                        if ($rootScope.items[i].id===item.id){
+                            $rootScope.items[i].name=item.name;
+                            $rootScope.items[i].done=item.done;
+                        }
+                    }
+                }
+
+            });
+
+
         };
 
-        $scope.clearList = function (listId) {
-            ///$http call
-
-            removeByAttr($scope.items, 'listId', listId)
-
-        };
-
-        $scope.deleteList = function (listId) {
-            ///$http call
-            removeByAttr($scope.items, 'listId', listId);
-            removeByAttr($scope.lists, 'id', listId);
-        };
-
-        $scope.deleteItem = function (itemId) {
-            ///$http call
-            $scope.items.splice(itemId, 1);
-        };
-
-
-        $scope.removeByAttr = function (arr, attr, value) {
+         function removeByAttr(arr, attr, value) {
             var i = arr.length;
             while (i--) {
                 if (arr[i]
@@ -280,5 +293,47 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 }
             }
             return arr;
+        }
+
+        $scope.deleteAllListsForUser = function (userId) {
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_lists_for_user',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {user_id:userId}
+            }).then(function success(response) {
+                $rootScope.lists = [];
+            });
+
         };
+
+        $scope.clearList = function (listId) {
+            $http({
+                method: 'GET',
+                url: baseURL + '/clear_list',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {list_id:listId}
+            }).then(function success(response) {
+                removeByAttr($rootScope.items, 'listId', listId)
+            });
+
+
+        };
+
+        $scope.deleteList = function (listId) {
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_list',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {list_id:listId}
+            }).then(function success(response) {
+                removeByAttr($rootScope.items, 'listId', listId);
+                removeByAttr($rootScope.lists, 'id', listId);
+            });
+
+        };
+
+
+
+
     });

@@ -8,7 +8,7 @@
             Create a new list
         </button>
 
-        <button class="btn btn-danger" ng-click="deleteAllLists()">
+        <button class="btn btn-danger" ng-click="deleteAllListsForUser(user.id)">
             Delete all lists
         </button>
 
@@ -22,25 +22,30 @@
                         <th>#</th>
                         <th>Item</th>
                         <th>Done</th>
+                        <th>Delete</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="item in items">
-                        <td>{{$index + 1}}</td>
-                        <td  ng-click="itemUpdateWindow()">{{item.name}}</td>
+                            <td ng-if="item.listId==list.id">{{$index + 1}}</td>
+                            <td ng-if="item.listId==list.id" editable-text="item.name"
+                                onaftersave="updateItem(item)">{{item.name || "empty"}}</td>
+                            <td ng-if="item.listId==list.id">
+                                <input type="checkbox" value={{item.done}} ng-click="updateItem(item)">
+                                &nbsp;
+                            </td>
                         <td>
-                            <input type="checkbox" value={{item.done}} ng-click="updateItem(item)">
-                            &nbsp;
+                            <button type="button" class="btn btn-danger" ng-click="itemDeleteWindow(item)">delete</button>
                         </td>
                     </tr>
                     </tbody>
 
                 </table>
-                <button class="btn btn-primary" ng-click="itemCreateWindow()">
+                <button class="btn btn-success" ng-click="itemCreateWindow(list.id)">
                     Add
                 </button>
-                <button type="button" class="btn btn-primary"
-                        ng-click="clearList(list.id)">Clear selected list
+                <button type="button" class="btn btn-warning"
+                        ng-click="clearList(list.id)">Clear list
                 </button>
                 <button type="button" class="btn btn-danger"
                         ng-click="deleteList(list.id)">Delete selected list
