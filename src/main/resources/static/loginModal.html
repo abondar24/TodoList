@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h4 class="modal-title">Login or sign up</h4>
+</div>
+<div class="modal-body">
+    <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
+
+    <div class="alert alert-danger" ng-show="alertType">
+        {{alertType}}
+    </div>
+
+    <form id="loginform" class="form-horizontal" role="form">
+
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                <input type="text" class="form-control" id="enterUsername" ng-model="newUser.username"
+                       autocomplete="on"
+                       placeholder="Username">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                <input type="password" class="form-control" id="enterPassword" ng-model="newUser.password"
+                       autocomplete="on"
+                       placeholder="Password">
+            </div>
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary pull-left" ng-click="createUser(newUser)">
+        Sign Up
+    </button>
+    <button type="button" class="btn btn-success pull-left" ng-click="loginUser(newUser)">
+        Log in
+    </button>
+
+</div>

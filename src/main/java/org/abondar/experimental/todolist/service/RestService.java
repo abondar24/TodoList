@@ -19,6 +19,7 @@ public interface RestService {
 
     public Response logoutUser(Long userId) throws IOException;
 
+    public Response findUser(String username) throws IOException;
 
     public Response createOrEditList(TodoList list)throws IOException;
 

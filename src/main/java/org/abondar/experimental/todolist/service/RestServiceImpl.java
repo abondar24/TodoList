@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
 @Path("/")
@@ -88,7 +87,7 @@ public class RestServiceImpl implements RestService {
             tags = {"TodoAPI"},
             value = "Create user",
             notes = "Creates a new user",
-            consumes = "application/x-www-urlformEncoded",
+            consumes = "application/x-www-urlformencoded",
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
             @ApiResponse(code = 302, message = "Username exists")})
@@ -100,7 +99,7 @@ public class RestServiceImpl implements RestService {
         User user = dbMapper.findUserByName(username);
         if (user != null) {
             logger.info("User already exists");
-            return Response.status(302).build();
+            return Response.status(Response.Status.FOUND).build();
         }
 
         String pwdHash = createHash(password);
@@ -108,14 +107,39 @@ public class RestServiceImpl implements RestService {
         dbMapper.insertOrUpdateUser(user);
         logger.info("User created: " + user.toString());
 
-        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
+        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.createToken(username,"borscht",null),"/",null),
                 "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
-        return Response.status(Response.Status.ACCEPTED).cookie(cookie)
+
+        NewCookie userCookie = new NewCookie(new Cookie("USER",
+               username,"/",null),
+                "User", 6000,new Date((new Date()).getTime() + 60000), false,false);
+        return Response.status(Response.Status.ACCEPTED).cookie(userCookie).cookie(authCookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
 
     }
 
+
+    @GET
+    @Path("/find_user")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Find user",
+            notes = "Finds a user by username",
+            produces = "application/json")
+    @Override
+    public Response findUser(@ApiParam(value = "Username", required = true) @QueryParam("username") String username) throws IOException {
+        System.out.println(username);
+        User user = dbMapper.findUserByName(username);
+        if (user == null) {
+            logger.info("User not found");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        logger.info("User found");
+        return Response.status(Response.Status.FOUND).build();
+    }
 
     @POST
     @Path("/login_user")
@@ -125,7 +149,7 @@ public class RestServiceImpl implements RestService {
     @ApiOperation(
             tags = {"TodoAPI"},
             value = "Log in a user",
-            consumes = "application/x-www-urlform-encoded",
+            consumes = "application/x-www-urlformencoded",
             produces = "application/json")
     @ApiResponses(value = {@ApiResponse(code = 202, message = "User id"),
             @ApiResponse(code = 401, message = "Wrong credentials")})
@@ -146,11 +170,14 @@ public class RestServiceImpl implements RestService {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH",
+        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH",
                 authService.authorizeUser(user,password),"/",null),
                 "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
+        NewCookie userCookie = new NewCookie(new Cookie("USER",
+                username,"/",null),
+                "User", 6000,new Date((new Date()).getTime() + 60000), false,false);
         logger.info("User has logged in");
-        return Response.status(Response.Status.ACCEPTED).cookie(cookie)
+        return Response.status(Response.Status.ACCEPTED).cookie(userCookie).cookie(authCookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
     }
 
@@ -176,10 +203,12 @@ public class RestServiceImpl implements RestService {
 
         logger.info("User found: " + user.toString());
 
-        NewCookie cookie = new NewCookie(new Cookie("X-JWT-AUTH", ""),
+        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH", "","/",""),
                 "JWT token", 6000, false);
+        NewCookie userCookie = new NewCookie(new Cookie("USER", "","/",null),
+                "User", 6000,new Date((new Date()).getTime() + 60000), false,false);
         logger.info("User has logged out");
-        return Response.ok().cookie(cookie).build();
+        return Response.ok().cookie(userCookie).cookie(authCookie).build();
     }
 
     @POST

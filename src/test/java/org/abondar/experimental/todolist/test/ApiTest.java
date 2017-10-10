@@ -228,8 +228,8 @@ public class ApiTest {
         client.path("/logout_user")
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("user_id",userId.toString());
-        response=client.get();
+        client.query("user_id", userId.toString());
+        response = client.get();
         cookie = response.getCookies().get("X-JWT-AUTH");
 
         assertEquals(200, response.getStatus());
@@ -238,6 +238,48 @@ public class ApiTest {
 
     }
 
+
+    @Test
+    public void testFindUser() {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+
+        String username = "alex";
+        Form form = new Form()
+                .param("username", username)
+                .param("password", "salo");
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+        client.post(form);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/find_user").accept(MediaType.APPLICATION_JSON);
+        client.query("username",username);
+        Response response = client.get();
+
+        assertEquals(302, response.getStatus());
+
+    }
+
+    @Test
+    public void testFindUserNotFound() {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        client.path("/find_user").accept(MediaType.APPLICATION_JSON);
+        client.query("username","aaaa");
+        Response response = client.get();
+
+        assertEquals(404, response.getStatus());
+
+    }
 
     @Test
     public void testCreateList() throws JsonProcessingException {
@@ -475,7 +517,7 @@ public class ApiTest {
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        response = client.post(Arrays.asList(listId,list1Id));
+        response = client.post(Arrays.asList(listId, list1Id));
         assertEquals(200, response.getStatus());
 
         List<Item> itemsForList = objectMapper.readValue(response.readEntity(String.class),
@@ -484,7 +526,6 @@ public class ApiTest {
         assertEquals(item.getName(), itemsForList.get(0).getName());
         assertEquals(item1.getName(), itemsForList.get(1).getName());
     }
-
 
 
     @Test
@@ -507,7 +548,7 @@ public class ApiTest {
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("user_id",userId.toString());
+        client.query("user_id", userId.toString());
 
         response = client.get();
         assertEquals(200, response.getStatus());
@@ -565,16 +606,15 @@ public class ApiTest {
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("item_id",item1Id.toString());
+        client.query("item_id", item1Id.toString());
 
         response = client.get();
         assertEquals(200, response.getStatus());
 
         List<Item> itemsForList = mapper.findItemsForList(listId);
-        assertEquals(1,itemsForList.size());
+        assertEquals(1, itemsForList.size());
 
     }
-
 
 
     @Test
@@ -625,13 +665,13 @@ public class ApiTest {
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("list_id",listId.toString());
+        client.query("list_id", listId.toString());
 
         response = client.get();
         assertEquals(200, response.getStatus());
 
         List<Item> itemsForList = mapper.findItemsForList(listId);
-        assertEquals(0,itemsForList.size());
+        assertEquals(0, itemsForList.size());
 
     }
 
@@ -670,14 +710,12 @@ public class ApiTest {
         client.post(list1);
 
 
-
-
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/delete_lists_for_user")
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("user_id",userId.toString());
+        client.query("user_id", userId.toString());
 
         response = client.get();
         assertEquals(200, response.getStatus());
@@ -716,7 +754,7 @@ public class ApiTest {
                 .type(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "JWT " + token);
-        client.query("list_id",listId.toString());
+        client.query("list_id", listId.toString());
 
         response = client.get();
         assertEquals(200, response.getStatus());
