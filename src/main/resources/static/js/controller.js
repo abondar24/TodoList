@@ -1,4 +1,4 @@
-angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal', 'xeditable'])
+angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal', 'xeditable', 'angular-jwt'])
     .constant('baseURL', 'http://localhost:8024/cxf/todo_list')
     .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
         $httpProvider.defaults.withCredentials = true;
@@ -14,27 +14,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             });
     }])
     .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location) {
-
-        function fillLists() {
-            $http({
-                method: 'GET',
-                url: baseURL + '/get_lists_by_user_id',
-                Authorization: $cookies.get('X-JWT-AUTH'),
-                params: {user_id: $rootScope.user.id}
-            }).then(function success(response) {
-                $rootScope.lists = response.data;
-
-
-                if ($rootScope.lists.length > 0) {
-                    var listIds = [];
-                    for (var i = 0; i < $rootScope.lists.length; i++) {
-                        listIds.push($rootScope.lists[i].id);
-                    }
-
-                    fillItems(listIds);
-                }
-            });
-        }
 
         function fillItems(listIds) {
             if (listIds.length === 1) {
@@ -61,7 +40,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         }
 
         return {
-            loginUser: function (user) {
+            loginUser: function (user, onSuccess) {
                 $http({
                     method: 'POST',
                     url: baseURL + '/login_user',
@@ -75,19 +54,36 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                     data: {username: user.username, password: user.password}
                 }).then(
                     function success(response) {
-                        $rootScope.user.username = user.username;
-                        $rootScope.user.id = response.data;
                         if ($cookies.get('X-JWT-AUTH') !== undefined) {
                             $location.path('/list');
-                            fillLists();
 
-                            return response.status;
+                            return onSuccess(response.status);
                         }
                     },
 
                     function error(response) {
-                        return response.status;
-                    })
+                        return onSuccess(response.status);
+                    });
+            },
+            fillLists: function () {
+                $http({
+                    method: 'GET',
+                    url: baseURL + '/get_lists_by_user_id',
+                    Authorization: $cookies.get('X-JWT-AUTH'),
+                    params: {user_id: $rootScope.user.id}
+                }).then(function success(response) {
+                    $rootScope.lists = response.data;
+
+
+                    if ($rootScope.lists.length > 0) {
+                        var listIds = [];
+                        for (var i = 0; i < $rootScope.lists.length; i++) {
+                            listIds.push($rootScope.lists[i].id);
+                        }
+
+                        fillItems(listIds);
+                    }
+                });
             }
 
         }
@@ -96,7 +92,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         editableOptions.theme = 'bs3';
         $rootScope.user = {id: 0, username: ""};
         $rootScope.items = [];
-
         $rootScope.lists = [];
         $rootScope.curListId = 0;
         $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
@@ -105,12 +100,11 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
     })
 
     .controller('loginCtrl', function ($scope, $rootScope, appFactory,
-                                       $http, baseURL, $cookies, $location, $uibModalInstance) {
-        $scope.alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
+                                       $http, baseURL, $cookies, $location, $uibModalInstance, $log) {
+        var alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
 
         $scope.alertType = "";
         $scope.createUser = function (user) {
-            $uibModalInstance.close();
             $http({
                 method: 'POST',
                 url: baseURL + '/create_user',
@@ -123,48 +117,49 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 },
                 data: {username: user.username, password: user.password}
             }).then(function success(response) {
-                    $scope.alertType = "";
                     $rootScope.user.username = user.username;
                     $rootScope.user.id = response.data;
 
                     if ($cookies.get('X-JWT-AUTH') !== undefined) {
+                        $uibModalInstance.close();
                         $location.path('/list');
-                    } else {
-
                     }
                 },
 
                 function error(response) {
                     if (response.status === 302) {
-                        $scope.alertType = appFactory.alerts[0];
+                        $scope.alertType = alerts[0];
                     }
 
                     if (response.status === 500) {
-                        $scope.alertType = appFactory.alerts[2];
+                        $scope.alertType = alerts[2];
                     }
                 });
 
         };
 
         $scope.loginUser = function (user) {
-            var status = appFactory.loginUser(user);
 
-            if (status === 202) {
-                $scope.alertType = ""
-            }
+            appFactory.loginUser(user, function (status) {
+                if (status === 202) {
+                    $uibModalInstance.close();
+                    $scope.alertType = ""
+                }
 
-            if (status === 401) {
-                $scope.alertType = $scope.alerts[1];
-            }
+                if (status === 401) {
+                    $scope.alertType = alerts[1];
+                }
 
-            if (status === 404) {
-                $scope.alertType = $scope.alerts[3];
-            }
+                if (status === 404) {
+                    $scope.alertType = alerts[3];
+                }
 
-            if (status === 500) {
-                $scope.alertType = $scope.alerts[2];
-            }
-            $uibModalInstance.close();
+                if (status === 500) {
+                    $scope.alertType = alerts[2];
+                }
+            });
+
+
         }
     })
     .controller('modalCtrl', function ($scope, $rootScope, $http, baseURL, $uibModalInstance, $cookies) {
@@ -233,42 +228,44 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
         };
     })
-    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal, $cookies) {
+    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal, $cookies, jwtHelper, $log, appFactory) {
+
+        var fillData =function (encToken) {
+            var tokenPayload = jwtHelper.decodeToken(encToken);
+
+            $http({
+                method: 'GET',
+                url: baseURL + '/find_user',
+                params: {"username": tokenPayload.sub}
+            }).then(function success(response) {
+                    $rootScope.user.id = response.data;
+                    $rootScope.user.username = tokenPayload.sub;
+                    appFactory.fillLists();
+
+                },
+                function error(response) {
+                }
+            );
+
+
+        };
+
 
         $scope.loginRequired = function () {
-            if ($cookies.get('X-JWT-AUTH') !== undefined && $cookies.get('USER') !== undefined) {
-
-                console.log($cookies.get('USER'));
-
-                $http({
-                    method: 'GET',
-                    url: baseURL + '/find_user',
-                    params:{user_id:$cookies.get('USER')},
-                    transformRequest: function (obj) {
-                        var str = [];
-                        for (var p in obj)
-                            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                        return str.join("&");
-                    },
-                    data: {username: $cookies.get('USER')}
-                }).then(function success(response) {
-                       console.log(response.status)
-                       // appFactory.loginUser(user);
-                    },
-                    function (response) {
-                        if (response.status === 404) {
-                            $scope.loginWindow();
-                        }
-                    });
-
+            var encToken = $cookies.get('X-JWT-AUTH');
+            if (encToken !== undefined) {
+               fillData(encToken);
             } else {
-                $scope.loginWindow();
+                $scope.loginWindow().result.then(function () {
+                    fillData($cookies.get('X-JWT-AUTH'));
+                });
+
 
             }
         };
 
         $scope.loginWindow = function () {
-            $uibModal.open(
+           return $uibModal.open(
                 {
                     templateUrl: 'loginModal.html',
                     controller: 'loginCtrl',
@@ -314,6 +311,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 }
             );
         };
+
 
         $scope.updateList = function (list) {
             $http({
