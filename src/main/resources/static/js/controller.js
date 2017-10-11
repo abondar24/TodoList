@@ -13,7 +13,29 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 redirectTo: '/'
             });
     }])
-    .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location) {
+    .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location,$uibModal,jwtHelper) {
+
+
+        function  fillLists() {
+            $http({
+                method: 'GET',
+                url: baseURL + '/get_lists_by_user_id',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {user_id: $rootScope.user.id}
+            }).then(function success(response) {
+                $rootScope.lists = response.data;
+
+
+                if ($rootScope.lists.length > 0) {
+                    var listIds = [];
+                    for (var i = 0; i < $rootScope.lists.length; i++) {
+                        listIds.push($rootScope.lists[i].id);
+                    }
+
+                    fillItems(listIds);
+                }
+            })
+        }
 
         function fillItems(listIds) {
             if (listIds.length === 1) {
@@ -65,28 +87,38 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                         return onSuccess(response.status);
                     });
             },
-            fillLists: function () {
+            loginWindow : function () {
+            return $uibModal.open(
+                {
+                    templateUrl: 'loginModal.html',
+                    controller: 'loginCtrl',
+                    keyboard: false,
+                    size: 'md'
+                }
+            );
+
+        },
+            fillData :function (encToken) {
+                var tokenPayload = jwtHelper.decodeToken(encToken);
+
                 $http({
                     method: 'GET',
-                    url: baseURL + '/get_lists_by_user_id',
-                    Authorization: $cookies.get('X-JWT-AUTH'),
-                    params: {user_id: $rootScope.user.id}
+                    url: baseURL + '/find_user',
+                    params: {"username": tokenPayload.sub}
                 }).then(function success(response) {
-                    $rootScope.lists = response.data;
+                        $rootScope.user.id = response.data;
+                        $rootScope.user.username = tokenPayload.sub;
+                        fillLists();
 
-
-                    if ($rootScope.lists.length > 0) {
-                        var listIds = [];
-                        for (var i = 0; i < $rootScope.lists.length; i++) {
-                            listIds.push($rootScope.lists[i].id);
-                        }
-
-                        fillItems(listIds);
+                    },
+                    function error(response) {
                     }
-                });
+                );
+
+
             }
 
-        }
+    }
     })
     .run(function ($rootScope, editableOptions) {
         editableOptions.theme = 'bs3';
@@ -160,7 +192,31 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             });
 
 
-        }
+        };
+
+        $scope.logoutUser = function () {
+            $http({
+                method: 'GET',
+                url: baseURL + '/logout_user',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {user_id: $rootScope.user.id}
+            }).then(function success(response) {
+                $rootScope.user = {id: 0, username: ""};
+                $rootScope.items = [];
+                $rootScope.lists = [];
+                $cookies.remove('X-JWT-AUTH');
+                $uibModalInstance.close();
+                appFactory.loginWindow().result.then(function () {
+                    appFactory.fillData($cookies.get('X-JWT-AUTH'));})
+            });
+
+        };
+
+
+        $scope.cancelLogout = function () {
+            $uibModalInstance.close();
+        };
+
     })
     .controller('modalCtrl', function ($scope, $rootScope, $http, baseURL, $uibModalInstance, $cookies) {
 
@@ -228,48 +284,23 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
         };
     })
-    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal, $cookies, jwtHelper, $log, appFactory) {
-
-        var fillData =function (encToken) {
-            var tokenPayload = jwtHelper.decodeToken(encToken);
-
-            $http({
-                method: 'GET',
-                url: baseURL + '/find_user',
-                params: {"username": tokenPayload.sub}
-            }).then(function success(response) {
-                    $rootScope.user.id = response.data;
-                    $rootScope.user.username = tokenPayload.sub;
-                    appFactory.fillLists();
-
-                },
-                function error(response) {
-                }
-            );
-
-
-        };
-
-
+    .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal, $cookies, $log, appFactory) {
         $scope.loginRequired = function () {
             var encToken = $cookies.get('X-JWT-AUTH');
             if (encToken !== undefined) {
-               fillData(encToken);
+               appFactory.fillData(encToken);
             } else {
-                $scope.loginWindow().result.then(function () {
-                    fillData($cookies.get('X-JWT-AUTH'));
-                });
-
-
+                appFactory.loginWindow().result.then(function () {
+                         appFactory.fillData($cookies.get('X-JWT-AUTH'));})
             }
         };
 
-        $scope.loginWindow = function () {
-           return $uibModal.open(
+        $scope.logoutWindow = function () {
+            $uibModal.open(
                 {
-                    templateUrl: 'loginModal.html',
+                    templateUrl: 'logoutModal.html',
                     controller: 'loginCtrl',
-                    keyboard: false,
+                    keyboard: true,
                     size: 'md'
                 }
             );
