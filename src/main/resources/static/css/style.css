@@ -11,3 +11,38 @@
 .modal-footer .btn {
     font-weight: bold;
 }
+
+.editable-click {
+    color: black;
+    border-color: black;
+    border-bottom: none;
+}
+.editable-click.editable-disabled {
+    color: black;
+    border-bottom: none;
+}
+
+#bar{
+    width: 60%;
+}
+
+#lst{
+
+    width: 60%;
+}
+
+.navbar-default{
+    background-color: antiquewhite
+}
+
+#single-button{
+    margin-top: 20px;
+    border-color: transparent;
+    background-color: transparent;
+
+}
+
+#delete-item{
+    border-color: transparent;
+    background-color: transparent;
+}

@@ -1,71 +1,76 @@
-
-<div id="todoPanel" class="panel panel-primary" ng-init="loginRequired()" ng-controller="listCtrl">
-
-    <div class="panel-heading" >Todo's list. User: {{user.username}}
-
-        <div class="btn-group  pull-right" uib-dropdown >
-            <button id="single-button" type="button" class="btn btn-primary" uib-dropdown-toggle >
-                <span class="glyphicon glyphicon-cog"></span>
-            </button>
-            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                    <li><a ng-click=""><span class="glyphicon glyphicon-pencil"></span>Edit</a></li>
-                    <li><a ng-click="logoutWindow()"><span class="glyphicon glyphicon-trash"></span>Log out</a></li>
-            </ul>
-        </div>
+<div id="todolist" ng-init="loginRequired()" ng-controller="listCtrl">
 
 
-    </div>
+    <div class="navbar navbar-default">
 
+        <div id="bar" class="container">
+            <div class="navbar-header">
+                <h1> User: {{user.username}}</h1>
 
-    <div class="panel-body">
-        <button class="btn btn-primary" ng-click="listWindow()">
-            Create a new list
-        </button>
-
-        <button class="btn btn-danger" ng-click="deleteAllListsForUser(user.id)">
-            Delete all lists
-        </button>
-
-
-        <div ng-repeat="list in lists">
-            <div class="panel-heading">
-                <h3 editable-text="list.name" onaftersave="updateList(list)">List: {{list.name || "empty"}}</h3>
-                <table class="table table-responsive ">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Item</th>
-                        <th>Done</th>
-                        <th>Delete</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="item in items">
-                            <td ng-if="item.listId==list.id">{{$index + 1}}</td>
-                            <td ng-if="item.listId==list.id" editable-text="item.name"
-                                onaftersave="updateItem(item)">{{item.name || "empty"}}</td>
-                            <td ng-if="item.listId==list.id">
-                                <input type="checkbox" value={{item.done}} ng-model="item.done" ng-click="updateItem(item)">
-                                &nbsp;
-                            </td>
-                        <td>
-                            <button type="button" class="btn btn-danger" ng-click="itemDeleteWindow(item)">delete</button>
-                        </td>
-                    </tr>
-                    </tbody>
-
-                </table>
-                <button class="btn btn-success" ng-click="itemCreateWindow(list.id)">
-                    Add
+            </div>
+            <div id="bt-grp" class="btn-group navbar-btn pull-right" uib-dropdown>
+                <button id="single-button" type="button" class="btn btn-basic" uib-dropdown-toggle>
+                    <span class="glyphicon glyphicon-cog"></span>
                 </button>
-                <button type="button" class="btn btn-warning"
-                        ng-click="clearList(list.id)">Clear list
-                </button>
-                <button type="button" class="btn btn-danger"
-                        ng-click="deleteList(list.id)">Delete selected list
-                </button>
+                <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                    <li><a ng-click="listWindow()">
+                        <span class="glyphicon glyphicon-list-alt"></span> Create new list</a>
+                    <li><a ng-click="deleteAllListsForUser(user.id)">
+                        <span class="glyphicon glyphicon-trash"></span> Delete all lists</a>
+                    <li><a ng-click="">
+                        <span class="glyphicon glyphicon-user"></span> Edit user</a></li>
+                    <li><a ng-click="logoutWindow()">
+                        <span class="glyphicon glyphicon-log-out"></span> Log out</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
+
+    <div id="lst" class="container" ng-repeat="list in lists">
+        <h2 editable-text="list.name" onaftersave="updateList(list)">List: {{list.name || "empty"}}</h2>
+        <table class="table table-hover table-striped ">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Done</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in items">
+                <td ng-if="item.listId==list.id">{{$index + 1}}</td>
+                <td ng-if="item.listId==list.id" editable-text="item.name"
+                    onaftersave="updateItem(item)">{{item.name || "empty"}}
+                </td>
+                <td ng-if="item.listId==list.id">
+                    <input type="checkbox" value={{item.done}} ng-model="item.done"
+                           ng-click="updateItem(item)">
+                    &nbsp;
+                </td>
+                <td ng-if="item.listId==list.id">
+                    <button id="delete-item" type="button" class="btn btn-default" ng-click="itemDeleteWindow(item)">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        <div id="bt-grp2" class="btn-group navbar-btn ">
+            <button id="add-item" class="btn" ng-click="itemCreateWindow(list.id)">
+                <span class="glyphicon glyphicon-plus text-success"></span> Add item
+            </button>
+            <button type="button" class="btn" ng-click="clearList(list.id)">
+                <span class="glyphicon glyphicon-edit text-warning"></span>
+                Clear list
+            </button>
+            <button type="button" class="btn" ng-click="deleteList(list.id)">
+                <span class="glyphicon glyphicon-trash text-danger"></span>
+                Delete list
+            </button>
+        </div>
+    </div>
+
 </div>
-</body>
