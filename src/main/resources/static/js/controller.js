@@ -13,10 +13,9 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 redirectTo: '/'
             });
     }])
-    .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location,$uibModal,jwtHelper) {
+    .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location, $uibModal, jwtHelper) {
 
-
-        function  fillLists() {
+        function fillLists() {
             $http({
                 method: 'GET',
                 url: baseURL + '/get_lists_by_user_id',
@@ -87,18 +86,18 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                         return onSuccess(response.status);
                     });
             },
-            loginWindow : function () {
-            return $uibModal.open(
-                {
-                    templateUrl: 'loginModal.html',
-                    controller: 'loginCtrl',
-                    keyboard: false,
-                    size: 'md'
-                }
-            );
+            loginWindow: function () {
+                return $uibModal.open(
+                    {
+                        templateUrl: 'loginForm.html',
+                        controller: 'loginCtrl',
+                        keyboard: false,
+                        size: 'md'
+                    }
+                );
 
-        },
-            fillData :function (encToken) {
+            },
+            fillData: function (encToken) {
                 var tokenPayload = jwtHelper.decodeToken(encToken);
 
                 $http({
@@ -118,7 +117,20 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
 
             }
 
-    }
+        }
+    })
+    .factory('clearFactory', function ($http, $cookies, baseURL, $rootScope,appFactory) {
+        return {
+            clearData: function () {
+                $rootScope.user = {id: 0, username: ""};
+                $rootScope.items = [];
+                $rootScope.lists = [];
+                $cookies.remove('X-JWT-AUTH');
+                appFactory.loginWindow().result.then(function () {
+                    appFactory.fillData($cookies.get('X-JWT-AUTH'));
+                });
+            }
+        }
     })
     .run(function ($rootScope, editableOptions) {
         editableOptions.theme = 'bs3';
@@ -127,13 +139,14 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         $rootScope.lists = [];
         $rootScope.curListId = 0;
         $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
-
+        $rootScope.alerts = ["Username already exists", "Wrong login or password", "Server error", "User not found",
+            "Username changed", "Password changed", "Wrong password"];
 
     })
 
-    .controller('loginCtrl', function ($scope, $rootScope, appFactory,
+    .controller('loginCtrl', function ($scope, $rootScope, appFactory, clearFactory,
                                        $http, baseURL, $cookies, $location, $uibModalInstance, $log) {
-        var alerts = ["User already exists", "Wrong login or password", "Server error", "User not found"];
+
 
         $scope.alertType = "";
         $scope.createUser = function (user) {
@@ -160,11 +173,11 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
 
                 function error(response) {
                     if (response.status === 302) {
-                        $scope.alertType = alerts[0];
+                        $scope.alertType = $rootScope.alerts[0];
                     }
 
                     if (response.status === 500) {
-                        $scope.alertType = alerts[2];
+                        $scope.alertType = $rootScope.alerts[2];
                     }
                 });
 
@@ -179,15 +192,15 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 }
 
                 if (status === 401) {
-                    $scope.alertType = alerts[1];
+                    $scope.alertType = $rootScope.alerts[1];
                 }
 
                 if (status === 404) {
-                    $scope.alertType = alerts[3];
+                    $scope.alertType = $rootScope.alerts[3];
                 }
 
                 if (status === 500) {
-                    $scope.alertType = alerts[2];
+                    $scope.alertType = $rootScope.alerts[2];
                 }
             });
 
@@ -201,13 +214,8 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 Authorization: $cookies.get('X-JWT-AUTH'),
                 params: {user_id: $rootScope.user.id}
             }).then(function success(response) {
-                $rootScope.user = {id: 0, username: ""};
-                $rootScope.items = [];
-                $rootScope.lists = [];
-                $cookies.remove('X-JWT-AUTH');
+                clearFactory.clearData();
                 $uibModalInstance.close();
-                appFactory.loginWindow().result.then(function () {
-                    appFactory.fillData($cookies.get('X-JWT-AUTH'));})
             });
 
         };
@@ -284,21 +292,106 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
         };
     })
+    .controller('userCtrl', function ($scope, $rootScope, $http, baseURL, $uibModalInstance,$cookies, $log,clearFactory) {
+
+        $scope.errorAlertType = '';
+        $scope.successAlertType = '';
+
+        $scope.oldUsername = $rootScope.user.username;
+        $scope.updateUsername = function (newUsername) {
+
+            $http({
+                method: 'POST',
+                url: baseURL + '/update_username',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                transformRequest: function (obj) {
+                    var str = [];
+                    for (var p in obj)
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    return str.join("&");
+                },
+                data: {username: newUsername, id: $rootScope.user.id}
+            }).then(function success(response) {
+                    $rootScope.user.username = response.data;
+                    $scope.successAlertType = $rootScope.alerts[4];
+                },
+
+                function error(response) {
+                    if (response.status === 302) {
+                        $scope.errorAlertType = $rootScope.alerts[0];
+                        $rootScope.user.username = $scope.oldUsername;
+                    }
+
+                    if (response.status === 500) {
+                        $scope.errorAlertType = $rootScope.alerts[2];
+                        $rootScope.user.username = $scope.oldUsername;
+                    }
+                });
+
+        };
+
+        $scope.updatePassword = function (newPassword, oldPassword) {
+
+            $http({
+                method: 'POST',
+                url: baseURL + '/update_password',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                transformRequest: function (obj) {
+                    var str = [];
+                    for (var p in obj)
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    return str.join("&");
+                },
+                data: {old_password: oldPassword, new_password: newPassword, id: $rootScope.user.id}
+            }).then(function success(response) {
+                    $scope.successAlertType = $rootScope.alerts[5]
+                },
+
+                function error(response) {
+                    if (response.status === 401) {
+                        $scope.errorAlertType = $rootScope.alerts[6];
+                    }
+
+                    if (response.status === 500) {
+                        $scope.errorAlertType = $rootScope.alerts[2];
+                    }
+                })
+        };
+
+
+        $scope.deleteUser = function () {
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_user',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {user_id: $rootScope.user.id}
+            }).then(function success(response) {
+                clearFactory.clearData();
+                $uibModalInstance.close();
+            });
+
+        };
+
+        $scope.close = function () {
+            $uibModalInstance.close();
+        }
+    })
     .controller('listCtrl', function ($scope, $rootScope, $http, baseURL, $uibModal, $cookies, $log, appFactory) {
         $scope.loginRequired = function () {
             var encToken = $cookies.get('X-JWT-AUTH');
             if (encToken !== undefined) {
-               appFactory.fillData(encToken);
+                appFactory.fillData(encToken);
             } else {
                 appFactory.loginWindow().result.then(function () {
-                         appFactory.fillData($cookies.get('X-JWT-AUTH'));})
+                    appFactory.fillData($cookies.get('X-JWT-AUTH'));
+                })
             }
         };
 
         $scope.logoutWindow = function () {
             $uibModal.open(
                 {
-                    templateUrl: 'logoutModal.html',
+                    templateUrl: 'logoutForm.html',
                     controller: 'loginCtrl',
                     keyboard: true,
                     size: 'md'
@@ -309,7 +402,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         $scope.listWindow = function () {
             $uibModal.open(
                 {
-                    templateUrl: 'listCreateModal.html',
+                    templateUrl: 'listCreateForm.html',
                     controller: 'modalCtrl',
                     keyboard: true,
                     size: 'md'
@@ -322,7 +415,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $rootScope.curListId = listId;
             $uibModal.open(
                 {
-                    templateUrl: 'itemCreateModal.html',
+                    templateUrl: 'itemCreateForm.html',
                     controller: 'modalCtrl',
                     keyboard: true,
                     size: 'md'
@@ -335,13 +428,26 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             $rootScope.curItem = item;
             $uibModal.open(
                 {
-                    templateUrl: 'itemDeleteModal.html',
+                    templateUrl: 'itemDeleteForm.html',
                     controller: 'modalCtrl',
                     keyboard: false,
                     size: 'md'
                 }
             );
         };
+
+
+        $scope.userWindow = function () {
+            $uibModal.open(
+                {
+                    templateUrl: 'userForm.html',
+                    controller: 'userCtrl',
+                    keyboard: false,
+                    size: 'md'
+                }
+            );
+        };
+
 
 
         $scope.updateList = function (list) {

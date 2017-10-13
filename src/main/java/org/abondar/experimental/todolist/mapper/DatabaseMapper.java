@@ -19,7 +19,7 @@ public interface DatabaseMapper {
     Item findItemById(@Param("id") Long  id);
     List<Item> findItemsForList(@Param("listId") Long listId);
     List<TodoList> findListsByUserId(@Param("userId") Long userId);
-    List<Item> findItemsForLists(@Param("listIds")List<Long> listLids);
+    List<Item> findItemsForLists(@Param("listIds")List<Long> listIds);
     void deleteAllUsers();
     void deleteAllLists();
     void deleteAllItems();
@@ -28,4 +28,5 @@ public interface DatabaseMapper {
     void deleteItemById(@Param("id")Long id);
     void deleteItemsForList(@Param("listId")Long listId);
     void deleteListsForUser(@Param("userId") Long userId);
+    void deleteItemsForLists(@Param("listIds")List<Long> listIds);
 }

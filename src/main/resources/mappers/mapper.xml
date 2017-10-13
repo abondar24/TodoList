@@ -200,4 +200,11 @@
         WHERE lst.id = #{listId}
     </delete>
 
+
+    <delete id="deleteItemsForLists">
+        DELETE FROM item
+        WHERE list_id  in
+        (<foreach collection="listIds" item="param1" separator=",">#{param1}</foreach>)
+    </delete>
+
 </mapper>

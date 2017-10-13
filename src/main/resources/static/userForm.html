@@ -1,0 +1,72 @@
+<div class="modal-header">
+    <h4 class="modal-title">Edit user</h4>
+</div>
+<div class="modal-body">
+    <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
+
+    <div class="alert alert-danger" ng-show="errorAlertType">
+        {{errorAlertType}}
+    </div>
+
+    <div class="alert alert-success" ng-show="successAlertType">
+        {{successAlertType}}
+    </div>
+
+    <form>
+        <div class="form-group">
+            <label for="enterUserName">New username</label>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                <input type="text" class="form-control" id="enterUserName"
+                       ng-model="newUsername"
+                       placeholder={{user.username}}>
+            </div>
+
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-success" data-dismiss="modal"
+                    ng-click="updateUsername(newUsername)">Change
+            </button>
+        </div>
+
+        <div class="form-group">
+
+            <label for="enterNewPassword">Old Password</label>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                <input type="password" class="form-control" id="enterOldPassword"
+                       ng-model="oldPassword">
+            </div>
+
+            <label for="enterNewPassword">New Password</label>
+            <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+            <input type="password" class="form-control" id="enterNewPassword"
+                   ng-model="newPassword">
+            </div>
+
+
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-success" data-dismiss="modal"
+                    ng-click="updatePassword(newPassword,oldPassword)">Change
+            </button>
+
+        </div>
+
+        <div class="alert alert-warning">
+            This action can't be undone
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                    ng-click="deleteUser()">Delete User
+            </button>
+
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-basic" data-dismiss="modal"
+            ng-click="close()">Close
+    </button>
+</div>

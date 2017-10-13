@@ -1,8 +1,10 @@
 package org.abondar.experimental.todolist.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.abondar.experimental.todolist.datamodel.Item;
 import org.abondar.experimental.todolist.datamodel.TodoList;
+
 import static org.abondar.experimental.todolist.security.PasswordUtil.*;
 
 import javax.ws.rs.core.Response;
@@ -13,19 +15,23 @@ public interface RestService {
 
     public Response echo();
 
-    public Response createUser(String username, String password) throws CannotPerformOperationException,IOException;
+    public Response createUser(String username, String password) throws CannotPerformOperationException, IOException;
 
-    public Response loginUser(String username, String password) throws InvalidHashException,CannotPerformOperationException,IOException;
+    public Response loginUser(String username, String password) throws InvalidHashException, CannotPerformOperationException, IOException;
 
     public Response logoutUser(Long userId) throws IOException;
 
+    public Response updateUsername(String username, Long id) throws IOException;
+
+    public Response updatePassword(String oldPassword, String newPassword, Long id) throws IOException, InvalidHashException, CannotPerformOperationException;
+
     public Response findUser(String username) throws IOException;
 
-    public Response createOrEditList(TodoList list)throws IOException;
+    public Response createOrEditList(TodoList list) throws IOException;
 
     public Response getListsByUser(Long userId);
 
-    public Response createOrEditItem(Item item)throws IOException;
+    public Response createOrEditItem(Item item) throws IOException;
 
     public Response getItemsForList(Long listId);
 

@@ -258,10 +258,10 @@ public class ApiTest {
 
         client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
         client.path("/find_user").accept(MediaType.APPLICATION_JSON);
-        client.query("username",username);
+        client.query("username", username);
         Response response = client.get();
 
-        assertEquals(302, response.getStatus());
+        assertEquals(200, response.getStatus());
 
     }
 
@@ -274,10 +274,182 @@ public class ApiTest {
         WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
 
         client.path("/find_user").accept(MediaType.APPLICATION_JSON);
-        client.query("username","aaaa");
+        client.query("username", "aaaa");
         Response response = client.get();
 
         assertEquals(404, response.getStatus());
+    }
+
+    @Test
+    public void testUpdateUsername() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+        Long userId = client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        String newUsername = "alex21";
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_username").accept(MediaType.APPLICATION_JSON);
+
+
+        Response resp = client.post(new Form().param("username", newUsername)
+                .param("id", userId.toString()));
+        assertEquals(200,resp.getStatus());
+
+        String upd = objectMapper.readValue(resp.readEntity(String.class),String.class);
+        assertEquals(newUsername, upd);
+    }
+
+    @Test
+    public void testUpdateUsernameUsernameExists() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+        Long userId = client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_username").accept(MediaType.APPLICATION_JSON);
+
+
+        Response resp = client.post(new Form().param("username", username)
+                .param("id", userId.toString()));
+        assertEquals(302,resp.getStatus());
+
+    }
+
+
+    @Test
+    public void testUpdateUsernameUserNotExists() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+         client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        String newUsername = "alex21";
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_username").accept(MediaType.APPLICATION_JSON);
+
+
+        Long randomId = 31L;
+        Response resp = client.post(new Form().param("username", newUsername)
+                .param("id",randomId.toString()));
+        assertEquals(404,resp.getStatus());
+
+    }
+
+
+
+    @Test
+    public void testUpdatePassword() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+        Long userId = client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        String newPassword = "salo3";
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_password").accept(MediaType.APPLICATION_JSON);
+
+
+        Response resp = client.post(new Form().param("old_password", password)
+                .param("new_password", newPassword)
+                .param("id", userId.toString()));
+        assertEquals(200,resp.getStatus());
+
+    }
+
+
+    @Test
+    public void testUpdatePasswordWrongOldPwd() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+        Long userId = client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        String newPassword = "salo3";
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_password").accept(MediaType.APPLICATION_JSON);
+
+        Response resp = client.post(new Form().param("old_password", "bla bla bla")
+                .param("new_password", newPassword)
+                .param("id", userId.toString()));
+        assertEquals(401,resp.getStatus());
+
+    }
+
+
+
+    @Test
+    public void testUpdatePasswordUserNotFound() throws IOException {
+
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+        WebClient client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+
+        String username = "alex";
+        String password = "salo";
+
+        client.path("/create_user").accept(MediaType.APPLICATION_JSON);
+
+        client.post(new Form().param("username", username)
+                .param("password", password)).readEntity(Long.class);
+
+        String newPassword = "salo3";
+        client = WebClient.create(endpoint, Collections.singletonList(new JacksonJsonProvider()));
+        client.path("/update_password").accept(MediaType.APPLICATION_JSON);
+
+
+        Long randomId = 31L;
+        Response resp = client.post(new Form().param("old_password", newPassword)
+                .param("new_password", newPassword)
+                .param("id", randomId.toString()));
+        assertEquals(404,resp.getStatus());
 
     }
 

@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value = "/", tags = "TodoAPI", description = "API to add and retrieve data from database")
 @Path("/")
@@ -95,7 +96,7 @@ public class RestServiceImpl implements RestService {
     public Response createUser(@ApiParam(value = "Username", required = true)
                                @FormParam("username") String username,
                                @ApiParam(value = "Password", required = true)
-                               @FormParam("password") String password) throws CannotPerformOperationException,IOException {
+                               @FormParam("password") String password) throws CannotPerformOperationException, IOException {
         User user = dbMapper.findUserByName(username);
         if (user != null) {
             logger.info("User already exists");
@@ -108,8 +109,8 @@ public class RestServiceImpl implements RestService {
         logger.info("User created: " + user.toString());
 
         NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH",
-                authService.createToken(username,"borscht",null),"/",null),
-                "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
+                authService.createToken(username, "borscht", null), "/", null),
+                "JWT token", 6000, new Date((new Date()).getTime() + 60000), false, false);
 
         return Response.status(Response.Status.ACCEPTED).cookie(authCookie)
                 .entity(objectMapper.writeValueAsString(user.getId())).build();
@@ -168,8 +169,8 @@ public class RestServiceImpl implements RestService {
         }
 
         NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH",
-                authService.authorizeUser(user,password),"/",null),
-                "JWT token", 6000,new Date((new Date()).getTime() + 60000), false,false);
+                authService.authorizeUser(user, password), "/", null),
+                "JWT token", 24000, new Date((new Date()).getTime() + 60000), false, false);
 
         logger.info("User has logged in");
         return Response.status(Response.Status.ACCEPTED).cookie(authCookie)
@@ -198,11 +199,99 @@ public class RestServiceImpl implements RestService {
 
         logger.info("User found: " + user.toString());
 
-        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH", "","/",""),
-                "JWT token", 6000, false);
+        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH", "", "/", ""),
+                "JWT token", 24000, false);
         logger.info("User has logged out");
         return Response.ok().cookie(authCookie).build();
     }
+
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/update_username")
+    @PermitAll
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Update username",
+            notes = "Updates username",
+            consumes = "application/x-www-urlformencoded",
+            produces = "application/json")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "New username"),
+            @ApiResponse(code = 302, message = "Such username exists"),
+            @ApiResponse(code = 404, message = "User not found")})
+    @Override
+    public Response updateUsername(@ApiParam(value = "Username", required = true)
+                                   @FormParam("username") String username,
+                                   @ApiParam(value = "User Id", required = true)
+                                   @FormParam("id") Long id) throws IOException {
+        User user = dbMapper.findUserById(id);
+        if (user == null) {
+            logger.info("User not found");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (dbMapper.findUserByName(username) != null) {
+            logger.info("Username already exists");
+            return Response.status(Response.Status.FOUND).build();
+        }
+
+        user.setUsername(username);
+        dbMapper.insertOrUpdateUser(user);
+        logger.info("Username updated " + user.toString());
+
+        NewCookie authCookie = new NewCookie(new Cookie("X-JWT-AUTH",
+                authService.createToken(username, "borscht", null), "/", null),
+                "JWT token", 6000, new Date((new Date()).getTime() + 60000), false, false);
+
+        return Response.ok(objectMapper.writeValueAsString(username)).cookie(authCookie).build();
+
+    }
+
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/update_password")
+    @PermitAll
+    @ApiOperation(
+            tags = {"TodoAPI"},
+            value = "Update password",
+            notes = "Updates password",
+            consumes = "application/x-www-urlformencoded",
+            produces = "application/json")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Password updated"),
+            @ApiResponse(code = 401, message = "Wrong old password"),
+            @ApiResponse(code = 404, message = "User not found")})
+    @Override
+    public Response updatePassword(@ApiParam(value = "Old Password", required = true)
+                                   @FormParam("old_password") String oldPassword,
+                                   @ApiParam(value = "New Password", required = true)
+                                   @FormParam("new_password") String newPassword,
+                                   @ApiParam(value = "User Id", required = true)
+                                   @FormParam("id") Long id)
+            throws IOException, InvalidHashException, CannotPerformOperationException {
+
+        User user = dbMapper.findUserById(id);
+        if (user == null) {
+            logger.info("User not found");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (!verifyPassword(oldPassword, user.getPassword())) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        String pwdHash = createHash(newPassword);
+        user.setPassword(pwdHash);
+        dbMapper.insertOrUpdateUser(user);
+        logger.info("Password updated " + user.toString());
+
+
+        return Response.ok().build();
+
+    }
+
 
     @POST
     @Path("/create_update_list")
@@ -242,9 +331,9 @@ public class RestServiceImpl implements RestService {
             logger.info("User not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        logger.info("User found: "+user.toString());
+        logger.info("User found: " + user.toString());
         List<TodoList> todos = dbMapper.findListsByUserId(userId);
-        logger.info("List added: "+todos.toString());
+        logger.info("List added: " + todos.toString());
         return Response.ok(todos).build();
     }
 
@@ -263,8 +352,8 @@ public class RestServiceImpl implements RestService {
     public Response createOrEditItem(@ApiParam(value = "Item data", required = true) Item item) throws IOException {
 
         dbMapper.insertOrUpdateItem(item);
-        logger.info("Item added: "+item.toString());
-        return  Response.ok(objectMapper.writeValueAsString(item.getId())).build();
+        logger.info("Item added: " + item.toString());
+        return Response.ok(objectMapper.writeValueAsString(item.getId())).build();
     }
 
     @GET
@@ -286,10 +375,10 @@ public class RestServiceImpl implements RestService {
             logger.info("List not found");
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        logger.info("List found: "+list.toString());
+        logger.info("List found: " + list.toString());
 
         List<Item> itemsForList = dbMapper.findItemsForList(listId);
-        logger.info("Items: "+itemsForList.toString());
+        logger.info("Items: " + itemsForList.toString());
         return Response.ok(itemsForList).build();
 
 
@@ -310,7 +399,7 @@ public class RestServiceImpl implements RestService {
     public Response getItemsForLists(List<Long> listIds) {
 
         List<Item> itemsForLists = dbMapper.findItemsForLists(listIds);
-        logger.info("Items: "+itemsForLists.toString());
+        logger.info("Items: " + itemsForLists.toString());
         return Response.ok(itemsForLists).build();
 
 
@@ -326,8 +415,14 @@ public class RestServiceImpl implements RestService {
     public Response deleteUser(@ApiParam(value = "User ID", required = true)
                                @QueryParam("user_id") Long id) {
 
-        dbMapper.findListsByUserId(id).forEach(l-> dbMapper.deleteItemsForList(l.getId()));
-        dbMapper.deleteListsForUser(id);
+        List<TodoList> lists=dbMapper.findListsByUserId(id);
+
+        if (!lists.isEmpty()) {
+            List<Long> listIds = lists.stream().map(TodoList::getId).collect(Collectors.toList());
+            dbMapper.deleteItemsForLists(listIds);
+            dbMapper.deleteListsForUser(id);
+        }
+
         dbMapper.deleteUserById(id);
         logger.info("user deleted");
         return Response.ok().build();
@@ -385,7 +480,8 @@ public class RestServiceImpl implements RestService {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "List deleted")})
     @Override
     public Response deleteListsForUser(@ApiParam(value = "User ID", required = true)
-                               @QueryParam("user_id") Long id) {
+                                       @QueryParam("user_id") Long id) {
+
         dbMapper.deleteListsForUser(id);
         logger.info("lists deleted");
         return Response.ok().build();

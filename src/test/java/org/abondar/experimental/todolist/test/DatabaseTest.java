@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void testFindUserByName(){
+    public void testFindUserByName() {
         logger.info("Find user by name Test");
         mapper.deleteAllItems();
         mapper.deleteAllLists();
@@ -76,12 +77,12 @@ public class DatabaseTest {
         user.setPassword("alex21");
         mapper.insertOrUpdateUser(user);
 
-        assertEquals(userId,user.getId());
+        assertEquals(userId, user.getId());
 
     }
 
     @Test
-    public void testDeleteUserById(){
+    public void testDeleteUserById() {
         logger.info("Delete User Test");
         mapper.deleteAllItems();
         mapper.deleteAllLists();
@@ -92,7 +93,7 @@ public class DatabaseTest {
         mapper.deleteUserById(user.getId());
 
         user = mapper.findUserById(user.getId());
-        assertEquals(null,user);
+        assertEquals(null, user);
 
     }
 
@@ -137,7 +138,7 @@ public class DatabaseTest {
         mapper.insertOrUpdateList(list);
 
 
-        assertEquals(listId,list.getId());
+        assertEquals(listId, list.getId());
 
 
     }
@@ -192,7 +193,6 @@ public class DatabaseTest {
     }
 
 
-
     @Test
     public void testInsertItem() {
         logger.info("Insert item test");
@@ -222,7 +222,6 @@ public class DatabaseTest {
     }
 
 
-
     @Test
     public void testFindItemsForLists() {
         logger.info("Insert item test");
@@ -246,7 +245,7 @@ public class DatabaseTest {
         mapper.insertOrUpdateItem(item1);
 
 
-        List<Item> itemsByLists = mapper.findItemsForLists(Arrays.asList(list.getId(),list1.getId()));
+        List<Item> itemsByLists = mapper.findItemsForLists(Arrays.asList(list.getId(), list1.getId()));
 
         assertEquals(2, itemsByLists.size());
         assertEquals(item.getName(), itemsByLists.get(0).getName());
@@ -276,7 +275,7 @@ public class DatabaseTest {
         item.setDone(true);
         mapper.insertOrUpdateItem(item);
 
-        assertEquals(id,item.getId());
+        assertEquals(id, item.getId());
 
     }
 
@@ -318,8 +317,6 @@ public class DatabaseTest {
 
         mapper.insertOrUpdateUser(user);
 
-        user = mapper.findUserById(user.getId());
-
         TodoList list = new TodoList("Salo", user.getId());
 
         mapper.insertOrUpdateList(list);
@@ -335,9 +332,45 @@ public class DatabaseTest {
 
     }
 
+    @Test
+    public void testDelteItemsForLists() {
+        logger.info("Delete items for lists test");
+        mapper.deleteAllItems();
+        mapper.deleteAllLists();
+        mapper.deleteAllUsers();
+
+        List<Long> listIds = new ArrayList<>();
+        User user = new User("alex", "alex1");
+        mapper.insertOrUpdateUser(user);
+
+        TodoList list1 = new TodoList("Salo", user.getId());
+        mapper.insertOrUpdateList(list1);
+
+        listIds.add(list1.getId());
+        Item item1 = new Item("eat", false, list1.getId());
+        mapper.insertOrUpdateItem(item1);
+
+
+        TodoList list2 = new TodoList("Salo1", user.getId());
+        mapper.insertOrUpdateList(list2);
+
+        listIds.add(list2.getId());
+        Item item2 = new Item("eat1", false, list2.getId());
+        mapper.insertOrUpdateItem(item2);
+
+        mapper.deleteItemsForLists(listIds);
+
+        List<Item> foundItems = mapper.findItemsForList(list1.getId());
+        assertEquals(0, foundItems.size());
+
+        foundItems = mapper.findItemsForList(list2.getId());
+        assertEquals(0, foundItems.size());
+
+    }
+
 
     @After
-    public void cleanDatabase(){
+    public void cleanDatabase() {
         mapper.deleteAllItems();
         mapper.deleteAllLists();
         mapper.deleteAllUsers();
