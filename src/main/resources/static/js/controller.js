@@ -271,25 +271,21 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             });
         };
 
-        $scope.deleteItem = function () {
+        $scope.cancel = function () {
             $uibModalInstance.close();
-            $http({
-                method: 'GET',
-                url: baseURL + '/delete_item',
-                Authorization: $cookies.get('X-JWT-AUTH'),
-                params: {item_id: $rootScope.curItem.id}
-            }).then(function success(response) {
-                var index = $rootScope.items.indexOf($rootScope.curItem);
-                if (index > -1) {
-                    $rootScope.items.splice(index, 1);
-                }
-            });
-
         };
 
-        $scope.cancelDeleteItem = function () {
-            $uibModalInstance.close();
-            $rootScope.curItem = {id: 0, name: "", done: false, listId: 0};
+        $scope.deleteAllListsForUser = function () {
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_lists_for_user',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {user_id: $rootScope.user.id}
+            }).then(function success(response) {
+                $uibModalInstance.close();
+                $rootScope.lists = [];
+            });
+
         };
     })
     .controller('userCtrl', function ($scope, $rootScope, $http, baseURL, $uibModalInstance,$cookies, $log,clearFactory) {
@@ -372,6 +368,7 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
 
         };
 
+
         $scope.close = function () {
             $uibModalInstance.close();
         }
@@ -424,11 +421,10 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
         };
 
 
-        $scope.itemDeleteWindow = function (item) {
-            $rootScope.curItem = item;
+        $scope.listDeleteWindow = function () {
             $uibModal.open(
                 {
-                    templateUrl: 'itemDeleteForm.html',
+                    templateUrl: 'listsDeleteForm.html',
                     controller: 'modalCtrl',
                     keyboard: false,
                     size: 'md'
@@ -517,17 +513,6 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             return arr;
         }
 
-        $scope.deleteAllListsForUser = function (userId) {
-            $http({
-                method: 'GET',
-                url: baseURL + '/delete_lists_for_user',
-                Authorization: $cookies.get('X-JWT-AUTH'),
-                params: {user_id: userId}
-            }).then(function success(response) {
-                $rootScope.lists = [];
-            });
-
-        };
 
         $scope.clearList = function (listId) {
             $http({
@@ -551,6 +536,21 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
             }).then(function success(response) {
                 removeByAttr($rootScope.items, 'listId', listId);
                 removeByAttr($rootScope.lists, 'id', listId);
+            });
+
+        };
+
+        $scope.deleteItem = function (item) {
+            $http({
+                method: 'GET',
+                url: baseURL + '/delete_item',
+                Authorization: $cookies.get('X-JWT-AUTH'),
+                params: {item_id: $rootScope.curItem.id}
+            }).then(function success(response) {
+                var index = $rootScope.items.indexOf(item);
+                if (index > -1) {
+                    $rootScope.items.splice(index, 1);
+                }
             });
 
         };

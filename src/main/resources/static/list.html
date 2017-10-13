@@ -14,7 +14,7 @@
                     <span class="glyphicon glyphicon-list-alt"></span>
                 </button>
 
-                <button id="delete-lists"class="btn btn-basic " ng-click="deleteAllListsForUser(user.id)">
+                <button id="delete-lists"class="btn btn-basic " ng-click="listDeleteWindow()">
                     <span class="glyphicon glyphicon-trash"></span>
                 </button>
 
@@ -55,7 +55,7 @@
                     &nbsp;
                 </td>
                 <td ng-if="item.listId==list.id">
-                    <button id="delete-item" type="button" class="btn btn-default" ng-click="itemDeleteWindow(item)">
+                    <button id="delete-item" type="button" class="btn btn-default" ng-click="deleteItem(item)">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </td>

@@ -482,6 +482,11 @@ public class RestServiceImpl implements RestService {
     public Response deleteListsForUser(@ApiParam(value = "User ID", required = true)
                                        @QueryParam("user_id") Long id) {
 
+        List<TodoList> lists = dbMapper.findListsByUserId(id);
+        if (!lists.isEmpty()) {
+            List<Long> listIds = lists.stream().map(TodoList::getId).collect(Collectors.toList());
+            dbMapper.deleteItemsForLists(listIds);
+        }
         dbMapper.deleteListsForUser(id);
         logger.info("lists deleted");
         return Response.ok().build();
