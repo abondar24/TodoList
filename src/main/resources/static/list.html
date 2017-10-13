@@ -8,15 +8,20 @@
                 <h1> User: {{user.username}}</h1>
 
             </div>
-            <div id="bt-grp" class="btn-group navbar-btn pull-right" uib-dropdown>
-                <button id="single-button" type="button" class="btn btn-basic" uib-dropdown-toggle>
+
+            <div id="bt-grp1" class="btn-group navbar-btn pull-right" uib-dropdown>
+                <button id="list-button" class="btn btn-basic " ng-click="listWindow()">
+                    <span class="glyphicon glyphicon-list-alt"></span>
+                </button>
+
+                <button id="delete-lists"class="btn btn-basic " ng-click="deleteAllListsForUser(user.id)">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+
+                <button id="user-button" type="button" class="btn btn-basic" uib-dropdown-toggle>
                     <span class="glyphicon glyphicon-cog"></span>
                 </button>
                 <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                    <li><a ng-click="listWindow()">
-                        <span class="glyphicon glyphicon-list-alt"></span> Create new list</a>
-                    <li><a ng-click="deleteAllListsForUser(user.id)">
-                        <span class="glyphicon glyphicon-trash"></span> Delete all lists</a>
                     <li><a ng-click="userWindow()">
                         <span class="glyphicon glyphicon-user"></span> Edit user</a></li>
                     <li><a ng-click="logoutWindow()">

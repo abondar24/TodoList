@@ -35,7 +35,21 @@
     background-color: antiquewhite
 }
 
-#single-button{
+#user-button{
+    margin-top: 20px;
+    border-color: transparent;
+    background-color: transparent;
+
+}
+
+#list-button{
+    margin-top: 20px;
+    border-color: transparent;
+    background-color: transparent;
+
+}
+
+#delete-lists{
     margin-top: 20px;
     border-color: transparent;
     background-color: transparent;
