@@ -1,5 +1,4 @@
 angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap', 'ui.bootstrap.modal', 'xeditable', 'angular-jwt'])
-    .constant('baseURL', 'http://localhost:8024/cxf/todo_list')
     .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
         $httpProvider.defaults.withCredentials = true;
         $routeProvider
@@ -13,6 +12,10 @@ angular.module('todoList', ['ngRoute', 'ngResource', 'ngCookies', 'ui.bootstrap'
                 redirectTo: '/'
             });
     }])
+    .factory('baseURL', function ($location) {
+        return $location.protocol() + "://" + $location.host() + (($location.port()) !== undefined ? ":" + $location.port() : "")
+            +"/cxf/todo_list";
+    })
     .factory('appFactory', function ($http, $cookies, baseURL, $rootScope, $location, $uibModal, jwtHelper) {
 
         function fillLists() {
