@@ -17,19 +17,31 @@ or delete todolists.
 
 # Build and run
 
-- You need to have a mysql server running with db created from db.sql file
+- You need to have a mysql server running with db created from db.sql file for tests
+
 - To run on your machine just
 ```
 mvn clean install
 java -jar target/TodoList-1.0.jar
 ```
-- To build docker image and run
+- To build docker image and run with docker compose
 ```
 mvn clean deploy
-docker run -d --name <name> -p <host_post>:8024 abondar/todolist
+docker compose up -d
 ```
-
+- To pull docker and run with docker compose
+```
+docker pull abondar/todolist
+docker compose up -d
+```
+- To pull docker and run without docker compose
+```
+docker pull abondar/todolist
+docker run -d --name <name> -p <port>:8024 --link db <image>
+Where db is mysql-based container with name db
+```
 - Open your browser and enter https://<hostname>:8024
+
 
 # API reference
 if you open https://<hostname>:8024/cxf you will see the link for swagger ui and xml description of api 
