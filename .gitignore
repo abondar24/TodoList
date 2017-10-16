@@ -26,3 +26,4 @@ hs_err_pid*
 .idea/
 TodoList.iml
 target/
+/src/main/resources/static/node_modules
