@@ -29,11 +29,6 @@ mvn clean deploy
 docker run -d --name <name> -p <host_post>:8024 abondar/todolist
 ```
 
-- To run docker image docker hub
-```
-docker pull abondar/todolist
-docker run -d --name <name> -p <host_post>:8024 abondar/todolist
-```
 - Open your browser and enter https://<hostname>:8024
 
 # API reference
