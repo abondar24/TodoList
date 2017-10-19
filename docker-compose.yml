@@ -11,7 +11,7 @@ services:
     volumes:
       - $PWD
     networks:
-          - mynet1
+          - todonet
 
   db:
     image: library/mysql:latest
@@ -21,9 +21,9 @@ services:
     volumes:
           - ../../../../_local_mysql_data:/var/lib/mysql
     networks:
-         - mynet1
+         - todonet
 
 
 networks:
-  mynet1:
+  todonet:
     driver: "bridge"
