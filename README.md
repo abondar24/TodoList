@@ -37,7 +37,7 @@ docker pull abondar/todolist
 docker run -d --name <name> -p <port>:8024 --link db <image>
 Where db is mysql-based container with name db
 ```
-- create database from db.sql file  
+- Create database from db.sql file 
 
 - Open your browser and enter https://<hostname>:8024
 
