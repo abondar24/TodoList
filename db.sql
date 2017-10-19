@@ -30,4 +30,4 @@ ALTER TABLE todo_list ADD CONSTRAINT fk_user_list
 FOREIGN KEY(user_id) REFERENCES  user(id);
 
 ALTER TABLE item ADD CONSTRAINT fk_list_item
-FOREIGN KEY (list_id) REFERENCES todoLIst (id);
+FOREIGN KEY (list_id) REFERENCES todo_list (id);

@@ -1,0 +1,29 @@
+version: '3'
+services:
+  web:
+    image:
+       "abondar/todolist"
+    ports:
+      - 8024:8024
+    # Link to containers in another service
+    links:
+      - db
+    volumes:
+      - $PWD
+    networks:
+          - mynet1
+
+  db:
+    image: library/mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: alex21
+    volumes:
+          - ../../../../_local_mysql_data:/var/lib/mysql
+    networks:
+         - mynet1
+
+
+networks:
+  mynet1:
+    driver: "bridge"

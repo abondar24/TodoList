@@ -84,6 +84,19 @@
             <artifactId>cxf-rt-transports-local</artifactId>
             <version>${cxf.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-features-logging</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.196</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!--for java 9 compatibility-->
         <dependency>
@@ -170,7 +183,6 @@
                         <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
-                <!--for java 9-->
                 <dependencies>
                     <dependency>
                         <groupId>org.codehaus.plexus</groupId>

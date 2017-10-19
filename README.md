@@ -17,8 +17,6 @@ or delete todolists.
 
 # Build and run
 
-- You need to have a mysql server running with db created from db.sql file for tests
-
 - To run on your machine just
 ```
 mvn clean install
@@ -26,12 +24,11 @@ java -jar target/TodoList-1.0.jar
 ```
 - To build docker image and run with docker compose
 ```
-mvn clean deploy
+mvn clean install
 docker compose up -d
 ```
-- To pull docker and run with docker compose
+- To  run with docker compose
 ```
-docker pull abondar/todolist
 docker compose up -d
 ```
 - To pull docker and run without docker compose

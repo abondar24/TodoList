@@ -195,9 +195,8 @@
 
 
     <delete id="deleteItemsForList" >
-        DELETE item FROM item
-        JOIN todo_list lst on lst.id = list_id
-        WHERE lst.id = #{listId}
+        DELETE FROM item
+        WHERE list_id = #{listId}
     </delete>
 
 
