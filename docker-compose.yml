@@ -18,6 +18,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: alex21
+      MYSQL_DATABASE: todo_list
     volumes:
           - ../../../../_local_mysql_data:/var/lib/mysql
     networks:

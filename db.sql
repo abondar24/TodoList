@@ -1,5 +1,3 @@
-CREATE DATABASE todo_list;
-
 USE todo_list;
 
 GRANT ALL ON todo_list.* to 'root'@'%' identified by 'alex21';
