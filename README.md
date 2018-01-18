@@ -27,16 +27,6 @@ java -jar target/TodoList-1.0.jar
 mvn clean install
 docker compose up -d
 ```
-- To  run with docker compose
-```
-docker compose up -d
-```
-- To pull docker and run without docker compose
-```
-docker pull abondar/todolist
-docker run -d --name <name> -p <port>:8024 --link db <image>
-Where db is mysql-based container with name db
-```
 - Create database from db.sql file 
 
 - Open your browser and enter https://<hostname>:8024
