@@ -1,7 +1,5 @@
 language: java
 jdk:
    - oraclejdk9
-
-services:
-  - docker          
-script: mvn clean install        
+       
+script: mvn clean install -DskipTests=false

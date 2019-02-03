@@ -164,7 +164,18 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+    </plugins>
+    </build>
+
+    <profiles>
+	    <profile>
+        <id>dockerBuild</id>
+		    <activation>
+	      <activeByDefault>false</activeByDefault>
+    </activation>
+    <build>
+	    <plugins>
+		    <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
                 <version>1.3.6</version>
@@ -196,6 +207,8 @@
                     </dependency>
                 </dependencies>
             </plugin>
-        </plugins>
-    </build>
+       </plugins>
+       </build>
+       </profile>
+    </profiles>
 </project>
