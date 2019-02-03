@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/abondar24/TodoList.svg?branch=master)](https://travis-ci.org/abondar24/TodoList)
+
 # TodoList
 Small TodoList app
 
